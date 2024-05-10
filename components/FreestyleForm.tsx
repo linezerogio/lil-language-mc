@@ -162,11 +162,11 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         )
     } else if (pageState === "rapping") {
         return (
-            <div className="w-full px-[30px] md:px-[100px] pb-[100px] pt-[25px] mx-auto flex flex-col min-h-[100vh]">
+            <div className="w-full px-[30px] md:px-[100px] pb-[30px] md:pb-[100px] pt-[25px] mx-auto flex flex-col min-h-[100vh]">
                 <div className={"absolute left-0 top-0 h-8 w-full"}>
                     <div className={`h-full transition-width ease-linear duration-[990ms] ` + calculateColor(timePercentageLeft)} style={{"width": timePercentageLeft + "%"}}></div>
                 </div>
-                <div className="flex flex-col w-auto pb-[220px] pt-[100px] mx-auto">
+                <div className="flex flex-col w-auto pb-[36px] md:pb-[220px] pt-[36px] md:pt-[100px] mx-auto">
                     <div className="flex w-auto content-center items-center">
                         <h1 className='flex-1 text-center pt-[20px] hidden md:block leading-none font-bold tracking-[0.06em] font-display clamp-word'>
                             {word.toUpperCase()}
@@ -188,8 +188,8 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 <div className='md:w-full flex flex-col flex-1'>
                     {lines.map((line, index) => {
                         return (
-                            <div key={index} className={'p-0 m-0 flex flex-col ' + (index === lines.length - 1 ? "flex-1" : "h-[82px]")}>
-                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[26px] ml-[40px] dark:text-black'>{index + 1}</span>}
+                            <div key={index} className={'p-0 m-0 flex flex-col ' + (index === lines.length - 1 ? "flex-1" : "md:h-[82px]")}>
+                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[20px] md:mt-[26px] ml-[20px] md:ml-[40px] dark:text-black'>{index + 1}</span>}
                                 <textarea
                                     placeholder='Type your bars...'
                                     ref={el => {
@@ -201,7 +201,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                                     onKeyPress={(e) => handleKeyPress(e, index)}
                                     value={line}
                                     draggable={false}
-                                    className={"text-start w-full text-[14px] md:text-2xl py-[10px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] bg-[#1C1E1E] flex-1 leading-snug " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#343737] pl-[84.5px] h-full" : "border-b-2 border-[#343737] pl-[84.5px] h-full")))}
+                                    className={"text-start w-full text-[14px] md:text-2xl py-[15px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] bg-[#1C1E1E] md:leading-snug flex-1 " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#343737] pl-[84.5px]" : "border-b-2 border-[#343737] pl-[84.5px]")))}
                                 />
                             </div>
                         )
