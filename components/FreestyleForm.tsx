@@ -188,8 +188,8 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 <div className='md:w-full flex flex-col flex-1'>
                     {lines.map((line, index) => {
                         return (
-                            <div key={index} className={'p-0 m-0 flex flex-col ' + (index === lines.length - 1 && index === 0 ? "h-full" : (index === lines.length - 1 ? "h-full" : ""))}>
-                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[18px] ml-[49.5px] dark:text-black'>{index + 1}</span>}
+                            <div key={index} className={'p-0 m-0 flex flex-col ' + (index === lines.length - 1 ? "flex-1" : "h-[82px]")}>
+                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[26px] ml-[40px] dark:text-black'>{index + 1}</span>}
                                 <textarea
                                     placeholder='Type your bars...'
                                     ref={el => {
