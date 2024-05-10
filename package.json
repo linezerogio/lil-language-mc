@@ -17,6 +17,7 @@
     "postgres": "^3.4.3",
     "random-words": "^2.0.0",
     "react": "^18",
+    "react-autosize-textarea": "^7.1.0",
     "react-dom": "^18",
     "syllable": "^5.0.1",
     "tailwind-merge": "^2.1.0"

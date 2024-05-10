@@ -26,6 +26,28 @@
   }
 }
 
+.custom-scrollbar {
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  
+  scrollbar-gutter: stable;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffffff00;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+}
+
+:focus-visible {
+  outline: none;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
