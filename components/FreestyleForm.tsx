@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, KeyboardEvent, useRef } from 'react';
+import { useState, useEffect, KeyboardEvent, useRef, use } from 'react';
 import { redirect, useRouter } from 'next/navigation';
 import { arraysEqual, getLastWord, getTimePercentageClass } from '@/util';
 import { getRhymeData } from '@/util/rhymes';
@@ -40,6 +40,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
 
     const [lines, setLines] = useState<string[]>(['']);
     const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
+    const mirrorInputRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const [score, setScore] = useState<number>(0);
 
@@ -66,6 +67,10 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         const newLines = [...lines];
         newLines[index] = newValue;
         setLines(newLines);
+        // alter mirror input
+        if (mirrorInputRefs.current[index]) {
+            mirrorInputRefs.current[index]!.innerText = newValue + '\u200B';
+        }
     }
 
     const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>, index: number) => {
@@ -189,7 +194,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     {lines.map((line, index) => {
                         return (
                             <div key={index} className={'p-0 m-0 flex flex-col ' + (index === lines.length - 1 ? "flex-1" : "md:h-[82px]")}>
-                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[20px] md:mt-[26px] ml-[20px] md:ml-[40px] dark:text-black'>{index + 1}</span>}
+                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[15px] md:mt-[26px] ml-[15px] md:ml-[40px] dark:text-black'>{index + 1}</span>}
                                 <textarea
                                     placeholder='Type your bars...'
                                     ref={el => {
@@ -198,10 +203,46 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                                     onChange={e => {
                                         updateLines(index, e.target.value);
                                     }}
-                                    onKeyPress={(e) => handleKeyPress(e, index)}
+                                    onKeyPress={(e) => {
+                                        handleKeyPress(e, index);
+                                        if (inputRefs.current[index] && mirrorInputRefs.current[index]) {
+                                            console.log(mirrorInputRefs.current[index]!.scrollWidth);
+                                            
+                                            const width = mirrorInputRefs.current[index]!.scrollWidth;
+                                            const lineWidth = inputRefs.current[index]!.clientWidth - 18;
+                                            console.log(width, lineWidth)
+                                            const numberOfLines = Math.ceil(width / lineWidth);
+                                            console.log(numberOfLines);
+
+                                            inputRefs.current[index]!.style.height = (numberOfLines*21 + 30) + 'px';
+                                            inputRefs.current[index]!.parentElement!.style.height = (numberOfLines*21 + 30) + 'px';
+                                        }
+                                    }}
                                     value={line}
                                     draggable={false}
-                                    className={"text-start w-full text-[14px] md:text-2xl py-[15px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] bg-[#1C1E1E] md:leading-snug flex-1 " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#343737] pl-[84.5px]" : "border-b-2 border-[#343737] pl-[84.5px]")))}
+                                    className={"text-start text-[14px] md:text-2xl py-[15px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] bg-[#1C1E1E] md:leading-snug overflow-y-hidden " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8 flex-1" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8 flex-1" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#343737] pl-[50px] md:pl-[84.5px]" : "border-b-2 border-[#343737] pl-[50px] md:pl-[84.5px]")))}
+                                />
+                                <div
+                                  ref={el => {
+                                    // @ts-ignore
+                                    if (el) mirrorInputRefs.current[index] = el;
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    // set to viewport size - 110
+                                    maxWidth: 'calc(100vw - 110px)',
+                                    position: 'absolute',
+                                    top: 50,
+                                    overflowX: 'scroll',
+                                    textOverflow: 'clip',
+                                    paddingLeft: '50px',
+                                    whiteSpace: 'nowrap',
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    fontSize: '14px',  // Ensure this matches the textarea's font size
+                                    border: '1px solid transparent',  // Ensure this matches the textarea's border
+                                    boxSizing: 'border-box'
+                                  }}
                                 />
                             </div>
                         )
