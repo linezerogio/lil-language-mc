@@ -50,11 +50,35 @@ export const getScore = ({ rhymeQuality, syllableMatch, complexity, bonusPoints,
 //     }
 // }
 
+export const getSentenceLengthInfo = (lines: string[]) => {
+    const sentenceLengths = lines.map(line => line.split(' ').length);
+   
+    return {
+        longSentences: sentenceLengths.filter(length => length > 13).length,
+        midSentences: sentenceLengths.filter(length => length >= 4 && length <= 13).length,
+        shortSentences: sentenceLengths.filter(length => length < 4).length
+    }
+}
+
 export const getComplexity = (lines: string[]) => {
     const numberOfBars = lines.length;
     const wordCount = lines.join(' ').split(' ').length;
 
     return Math.max(0, Math.min(1, (Math.round(wordCount / numberOfBars) - 4) * 0.1))
+}
+
+// get the number of line pairs that have equal syllables
+export const getSyllableMatchCount = (lines: string[]) => {
+    let comparisons = [];
+
+    for (let i = 0; i < lines.length; i += 2) {
+        if (lines.length >= i + 2) {
+            const diff = Math.abs(syllable(lines[i]) - syllable(lines[i + 1]));
+            comparisons.push(diff)
+        }
+    }
+
+    return comparisons.filter(diff => diff === 0).length;
 }
 
 export const getSyllableMatch = (lines: string[]) => {
@@ -82,17 +106,27 @@ export const getBonusPoints = (percentageOfTimeLeft: number, endedWithKeyword: b
     return timeBonus + keywordBonus;
 }
 
-export const getPenalty = (percentageOfTimeLeft: number, lines: string[]) => {
-    const timePenalty = percentageOfTimeLeft == 0 ? 0.5 : 0;
-
-    // check that last word of each line is unique
+export const getRepeatPenalty = (lines: string[]) => {
     const lastWords = lines.map(line => {
         const words = line.split(' ');
         return words[words.length - 1];
     });
     const repeatPenalty = hasDuplicates(lastWords) ? 0.5 : 0;
 
-    return timePenalty + repeatPenalty;
+    return repeatPenalty;
+}
+
+export const getTimePenalty = (percentageOfTimeLeft: number) => {
+    const timePenalty = percentageOfTimeLeft == 0 ? 0.5 : 0;
+
+    return timePenalty;
+}
+
+export const getPenalty = (percentageOfTimeLeft: number, lines: string[]) => {
+    const repeatPenalty = getRepeatPenalty(lines);
+    const timePenalty = getTimePenalty(percentageOfTimeLeft);
+
+    return repeatPenalty + timePenalty;
 }
 
 export const getWordCountPenalty = (lines: string[]) => {
