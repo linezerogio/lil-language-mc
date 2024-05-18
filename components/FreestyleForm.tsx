@@ -39,10 +39,10 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     const [timeLeft, setTimeLeft] = useState(totalTime);
 
     useEffect(() => {
-        timeLeft > 0 && setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        timeLeft > 0 && pageState === "rapping" && setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
         timePercentageLeft > 0 && pageState === "rapping" && setTimeout(() => setTimePercentageLeft(timeLeft / totalTime * 100), 1000)
         timeLeft < 1 && setTimeout(() => submit(), 1000)
-    }, [timeLeft]);
+    }, [timeLeft, pageState]);
 
     const [lines, setLines] = useState<string[]>(['']);
     const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
@@ -176,12 +176,12 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 syllableMatch: syllableMatchCount,
                 rhymePlacement: 0,
                 syllableDifference: lines.length / 2 - syllableMatchCount,
-                percentage: syllableMatch / 0.5
+                percentage: syllableMatch
             };
 
             newScoreBreakdown.lengthBreakdown = {
                 ...getSentenceLengthInfo(lines),
-                percentage: wordCountPenalty > 0 ? 0.1 : (complexity / 0.3)
+                percentage: wordCountPenalty < 1 ? 0.1 : (complexity / 0.3)
             };
 
             newScoreBreakdown.speedBreakdown = {
@@ -262,7 +262,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         )
     } else if (pageState === "score") {
         return (
-            <div className="max-w-[2560px] w-full px-[100px] pb-[100px] pt-[25px] mx-auto text-center flex flex-col">
+            <div className="max-w-[2560px] w-full h-full px-[100px] pb-[100px] pt-[25px] mx-auto text-center flex flex-col">
                 <div className="font-extrabold text-collection-1-light-gray text-[39px] tracking-[1.95px] leading-[normal] text-start">
                     LLMC
                 </div>
@@ -274,7 +274,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     <ScoreBreakdownView scoreBreakdown={scoreBreakdown} />
                 </div>
 
-                <div className='md:w-full flex flex-col flex-1 h-full relative overflow-y-auto rounded-[12px] md:rounded-[25px]'>
+                <div className='md:w-full flex flex-col flex-1 relative overflow-y-auto rounded-[12px] md:rounded-[25px]'>
                     {lines.map((line, index) => (
                         <div key={index} className={'p-0 m-0 flex flex-col relative'}>
                             <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[15px] md:mt-[26px] ml-[15px] md:ml-[40px] dark:text-black'>{index + 1}</span>
@@ -293,31 +293,54 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     ))}
                 </div>
 
-                <div className='flex'>
-                    <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[10px]">
-                        {newDifficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="/Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
-                            <div className='absolute right-[17px] top-[19px]'><Image src="/DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                <div className='flex mt-[30px] justify-center'>
+                    <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[25px]">
+                        {newDifficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Easy.svg" height={24.57} width={40} alt={"Easy Icon"} className='mr-[10px] px-[5.775px]' /> Easy</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
                         </button>}
-                        {newDifficulty === "medium" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="/Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
-                            <div className='absolute right-[17px] top-[19px]'><Image src="/DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        {newDifficulty === "medium" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Medium.svg" height={24.01} width={40} alt={"Medium Icon"} className='mr-[10px] px-[6.1px]' /> Medium</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
                         </button>}
-                        {newDifficulty === "hard" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[25px] h-[48px] justify-start items-center gap-2.5 flex"}>
-                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="/Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
-                            <div className='absolute right-[17px] top-[19px]'><Image src="/DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        {newDifficulty === "hard" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Hard.svg" height={26.3} width={40} alt={"Hard Icon"} className='mr-[10px] px-[2.265px]' /> Hard</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
                         </button>}
                         {difficultyMenuOpen && <div className="flex flex-col"><button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="/Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
                         </button>
                             <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[57px]"}><Image src="/Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
                             </button>
                             <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[25px] h-[38px] justify-start items-center gap-2.5 flex"}>
-                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[100px]"}><Image src="/Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
                             </button></div>}
                     </div>
-                    <button className="bg-[#5CE2C7] py-[18px] mx-[25px] mb-[25px] md:mb-[100px] rounded-[12px] md:rounded-[25px] text-black text-[18px] md:text-[25px] font-bold md:w-[286px] font-[termina]" onClick={() => reset()}>Play Again</button>
+                    <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] md:rounded-[25px] text-black text-[18px] md:text-[25px] font-bold md:w-[286px] font-[termina]" onClick={() => reset()}>PLAY AGAIN</button>
+                    <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[25px]">
+                        {newDifficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Easy.svg" height={24.57} width={40} alt={"Easy Icon"} className='mr-[10px] px-[5.775px]' /> Easy</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {newDifficulty === "medium" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Medium.svg" height={24.01} width={40} alt={"Medium Icon"} className='mr-[10px] px-[6.1px]' /> Medium</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {newDifficulty === "hard" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Hard.svg" height={26.3} width={40} alt={"Hard Icon"} className='mr-[10px] px-[2.265px]' /> Hard</div>
+                            <div><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {difficultyMenuOpen && <div className="flex flex-col"><button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
+                        </button>
+                            <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
+                            </button>
+                            <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[25px] h-[38px] justify-start items-center gap-2.5 flex"}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
+                            </button></div>}
+                    </div>
                 </div>
             </div>
         )

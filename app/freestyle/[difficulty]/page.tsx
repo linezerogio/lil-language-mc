@@ -13,7 +13,7 @@ export default async function FreestylePage({params: {difficulty}}: {params: {di
   const word = await getWordByDifficulty(difficulty);
 
   return (
-    <main className='mx-auto'>
+    <main className='mx-auto h-full'>
       <FreestyleForm word={word!.word} difficulty={difficulty} />
     </main>
   )

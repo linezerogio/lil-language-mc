@@ -80,7 +80,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown 
     const lengthModifiers: Modifier[] = [
         { text: "Long Sentences", positive: true, number: lengthBreakdown.longSentences },
         { text: "Mid Sentences", positive: true, number: lengthBreakdown.midSentences },
-        { text: "Short Sentences", positive: true, number: lengthBreakdown.shortSentences }
+        { text: "Short Sentences", positive: false, number: lengthBreakdown.shortSentences }
     ];
 
     const speedModifiers: Modifier[] = [
