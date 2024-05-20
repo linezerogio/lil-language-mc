@@ -49,9 +49,9 @@ export default function StartSection() {
     return <>
         <div className='flex justify-between w-full '>
             <h1 className='relative leading-0 top-[30px] md:top-[25px] text-[32px] md:text-[61px] overflow-x-hidden max-w-[2560px] md:px-[100px]'>LLMC <span className='align-text-top text-[#5DE3C8] text-[13px] md:text-[16px]'>alpha</span></h1>
-            <button type="button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className='h-24 w-28'>
+            {/* <button type="button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className='h-24 w-28'>
                 { lottie.View }
-            </button>
+            </button> */}
         </div>
         <div className="hidden md:flex absolute top-[25px] left-0 right-0 w-[697px] justify-center mx-auto z-10">
             <button type="button" onClick={() => setDifficulty("easy")} className={(difficulty === "easy" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
@@ -60,7 +60,7 @@ export default function StartSection() {
             <button type="button" onClick={() => setDifficulty("medium")} className={(difficulty === "medium" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
                 <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="Medium.svg" height={28.01} width={32.43} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
             </button>
-            <button type="button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className={(difficulty === "hard" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
+            <button type="button" onClick={() => setDifficulty("hard")} className={(difficulty === "hard" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
                 <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="Hard.svg" height={33.84} width={45.63} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
             </button>
         </div>

@@ -32,8 +32,12 @@ const ScoreGauge = ({
   const largeArcFlag = endAngle2 >= -135 ? 0 : 1;
 
   const arrowSize = 15;
-  const arrowX = centerX - (160 + arrowSize) * Math.cos(((endAngle2 - 2) * Math.PI) / 180);
-  const arrowY = centerY + (160 + arrowSize) * Math.sin(((endAngle2 - 2) * Math.PI) / 180);
+  const arrowWidthBasedOnRotation = Math.abs(arrowSize * Math.sin((angle * Math.PI) / 180));
+  const arrowHeightBasedOnRotation = Math.abs(arrowSize * Math.cos((angle * Math.PI) / 180));
+  const arrowX = centerX - (160 + (arrowWidthBasedOnRotation)) * Math.cos(((endAngle2 - 2) * Math.PI) / 180);
+  const arrowY = centerY + (160 + (arrowHeightBasedOnRotation)) * Math.sin(((endAngle2 - 2) * Math.PI) / 180);
+  // const arrowX = centerX - (160 + (arrowSize)) * Math.cos(((endAngle2 - 2) * Math.PI) / 180);
+  // const arrowY = centerY + (160 + (arrowSize)) * Math.sin(((endAngle2 - 2) * Math.PI) / 180);
 
   const arrowAngle = angle + 137;
 
