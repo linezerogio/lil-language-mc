@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ScoreGauge = ({
   score,
@@ -9,6 +9,18 @@ const ScoreGauge = ({
   max: number;
   word: string;
 }) => {
+  const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+          mediaQuery.removeEventListener('change', handleChange);
+      };
+  }, []);
+  
   const percentage = (score / max) * 100;
   const angle = (percentage / 100) * 270;
 
@@ -77,12 +89,12 @@ const ScoreGauge = ({
              L ${arrowX + arrowSize} ${arrowY}
              L ${arrowX} ${arrowY + arrowSize}
              Z`}
-          fill="#F5F5F5"
+          fill={darkMode ? "#F5F5F5" : "#000000"}
           transform={`rotate(${arrowAngle} ${arrowX + (arrowSize / 2)} ${arrowY + (arrowSize / 2)})`}
         />
       </svg>
-      <div className="w-[320px] h-[320px] bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-14 left-14">
-        <div className="w-[285px] h-[285px] border-2 border-solid border-[#343737] rounded-full flex flex-col justify-center items-center">
+      <div className="w-[320px] h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-14 left-14">
+        <div className="w-[285px] h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
           <h1 className="text-[40px] md:text-[65px] leading-none font-bold tracking-[0.06em] py-[15px] font-[termina]">
             {score}
           </h1>

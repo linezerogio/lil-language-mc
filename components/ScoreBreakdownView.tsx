@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image'
 import ScoreBreakdown from '@/types/breakdown';
 import { Progress } from '@radix-ui/react-progress';
@@ -23,6 +23,17 @@ interface ScoreBreakdownViewProps {
 }
 
 const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, percentage, modifiers, showInfo, setShowInfo }) => {
+    const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
+    }, []);
 
     return (
             <div className='flex flex-1 flex-col p-[25px]'>
@@ -41,7 +52,7 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
                         </button>
                     </div>
                     {/* Linear Progress Bar */}
-                    <LinearProgressBar progress={percentage} height={16} strokeWidth={16} activeColor="#5CE2C7" inactiveColor="#343737" />
+                    <LinearProgressBar progress={percentage} height={16} strokeWidth={16} activeColor="#5CE2C7" inactiveColor={darkMode ? "#343737" : "#F5F5F5"} />
                 </div>
                 <div className='flex flex-col pt-5'>
                     {modifiers.filter(
@@ -89,10 +100,10 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown 
     ];
 
     return (
-        <div className='bg-[#1B1C1D] flex flex-1 rounded-[25px] ml-[45px] my-[43px] overflow-x-auto'>
+        <div className='bg-white dark:bg-[#1B1C1D] flex flex-1 rounded-[25px] ml-[45px] my-[43px] overflow-x-auto'>
             {showInfo && <div className='absolute top-0 left-0 w-full h-full bg-[#000000bb] z-20'>
-                <div className='relative bg-[#1B1C1D] flex w-[1058px] h-[199px] top-[calc(50vh-99.5px)] left-[calc(50vw-529px)] bottom-0 rounded-[25px]'>
-                <button className='absolute top-[25px] right-[25px] w-[15px] h-[15px] bg-[#1B1C1D] z-30' onClick={() => setShowInfo(!showInfo)}>
+                <div className='relative bg-white dark:bg-[#1B1C1D] flex w-[1058px] h-[199px] top-[calc(50vh-99.5px)] left-[calc(50vw-529px)] bottom-0 rounded-[25px]'>
+                <button className='absolute top-[25px] right-[25px] w-[15px] h-[15px] z-30' onClick={() => setShowInfo(!showInfo)}>
                     <Image src="/icons/Close.svg" width={20} height={20} alt="Close Icon" />
                 </button>    
                 {["Rhyme", "Flow", "Length", "Speed"].map((type) => (
@@ -108,7 +119,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown 
                             </div>
                             <p className="text-[24px] font-semibold">{type}</p>
                         </div>
-                        <p className='text-[16px] text-[#B2B2B2] text-left'>
+                        <p className='text-[16px] text-[#565757] dark:text-[#B2B2B2] text-left'>
                             {type === "Rhyme" && "The more exact and near rhymes you end your sentences with, the higher this core."}
                             {type === "Flow" && "Based on how often you have exact or near matching syllables."}
                             {type === "Length" && "The longer each of your sentences are, the higher this score will be."}

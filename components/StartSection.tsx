@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLottie } from "lottie-react";
 import darkModeToggle from "../public/darkModeToggle.json";
+import Header from './Header';
 
 export default function StartSection() {
     const router = useRouter();
 
     const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
     const [difficultyMenuOpen, setDifficultyMenuOpen] = useState<boolean>(false);
-
-    const [theme, setTheme] = useState<"light" | "dark">(typeof window !== "undefined" ? (localStorage.getItem("theme") as "light" | "dark" || "light") : "light");
 
     const handleDifficultyButton = (difficulty: "easy" | "medium" | "hard") => {
         if (difficultyMenuOpen) {
@@ -21,89 +20,101 @@ export default function StartSection() {
         setDifficultyMenuOpen(!difficultyMenuOpen)
     }
 
-    const options = {
-        animationData: darkModeToggle,
-        style: { width: 100 },
-        loop: false,
-        autoplay: false,
-        speed: 1
-    };
+    const [newGameMode, setNewGameMode] = useState<"4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode">("4-Bar Mode");
+    const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
 
-    const lottie = useLottie(options);
-
-    useEffect(() => {
-        if (theme === "dark") {
-            console.log("dark");
-            document.documentElement.classList.add("dark");
-            
-            lottie.setDirection(-1);
-            lottie.play();
-        } else {
-            console.log("light");
-            document.documentElement.classList.remove("dark");
-            lottie.setDirection(1);
-            lottie.play();
+    const handleGameModeButton = (gameMode: "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode") => {
+        if (gameModeMenuOpen) {
+            setNewGameMode(gameMode)
         }
-    }, [theme, lottie]);
+        setGameModeMenuOpen(!gameModeMenuOpen)
+    }
 
-    return <>
-        <div className='flex justify-between w-full '>
-            <h1 className='relative leading-0 top-[30px] md:top-[25px] text-[32px] md:text-[61px] overflow-x-hidden max-w-[2560px] md:px-[100px]'>LLMC <span className='align-text-top text-[#5DE3C8] text-[13px] md:text-[16px]'>alpha</span></h1>
-            {/* <button type="button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className='h-24 w-28'>
-                { lottie.View }
-            </button> */}
+    return <div className='h-full flex flex-col justify-between'>
+        <div className='px-[100px] pt-[50px]'>
+            <Header />
         </div>
-        <div className="hidden md:flex absolute top-[25px] left-0 right-0 w-[697px] justify-center mx-auto z-10">
-            <button type="button" onClick={() => setDifficulty("easy")} className={(difficulty === "easy" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="Easy.svg" height={28.01} width={32.43} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
-            </button>
-            <button type="button" onClick={() => setDifficulty("medium")} className={(difficulty === "medium" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="Medium.svg" height={28.01} width={32.43} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
-            </button>
-            <button type="button" onClick={() => setDifficulty("hard")} className={(difficulty === "hard" ? "bg-[#FFF] dark:bg-[#1C1E1E] " : "") + "rounded-[25px] px-[25px] mx-[9px] py-[20px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="Hard.svg" height={33.84} width={45.63} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
-            </button>
-        </div>
-        <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row md:hidden absolute top-[25px] right-[30px] w-[153px] justify-center z-10 rounded-[10px]">
-            {difficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
-                <div className='absolute right-[17px] top-[19px]'><Image src="DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-            </button>}
-            {difficulty === "medium" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
-                <div className='absolute right-[17px] top-[19px]'><Image src="DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-            </button>}
-            {difficulty === "hard" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[25px] h-[48px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
-                <div className='absolute right-[17px] top-[19px]'><Image src="DownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="WhiteDownArrow.svg" height={20} width={18} alt={"Down Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-            </button>}
-            {difficultyMenuOpen && <div className="flex flex-col"><button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[15px]"}><Image src="Easy.svg" height={18} width={30} alt={"Easy Icon"} className='pr-[10px]' /> Easy</div>
-            </button>
-                <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[25px] h-[38px] mb-[10px] justify-start items-center gap-2.5 flex"}>
-                    <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[57px]"}><Image src="Medium.svg" height={18} width={30} alt={"Medium Icon"} className='pr-[10px]' /> Medium</div>
-                </button>
-                <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[25px] h-[38px] justify-start items-center gap-2.5 flex"}>
-                    <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center absolute left-[15px] top-[100px]"}><Image src="Hard.svg" height={18} width={30} alt={"Hard Icon"} className='pr-[10px]' /> Hard</div>
-                </button></div>}
-        </div>
-        <div className="absolute top-0 left-0 bottom-0 right-0 flex justify-center items-center max-w-[2560px] md:px-[100px] mx-auto">
-            <div className="flex-col justify-center items-center gap-10 flex">
+        <div className="flex justify-center items-center max-w-[2560px] md:px-[100px] mx-auto">
+            <div className="flex-col justify-center items-center flex gap-10">
                 <div className="flex-col justify-center items-center flex">
-                    <div className="text-center">
-                        <span className="text-[22px] md:text-[61px] font-extrabold tracking-[3.05px]">Your word is </span>
-                        <span className="text-[22px] md:text-[61px] font-bold tracking-[-4px]">________<br /></span>
-                        <span className="text-[22px] md:text-[61px] font-extrabold tracking-[3.05px]">Write 4 bars in 40 seconds</span>
+                    <div className="text-center font-[termina] font-extrabold text-[75px]">
+                        CAN YOU FREESTYLE?
                     </div>
-                    <div className="md:w-[842px] text-center text-[16px] md:text-[24px] font-normal tracking-wide">Bonus: End with the Keyword</div>
+                    <div className="text-center font-[neulis-sans] text-[24px]">
+                        Write 4 sentences that rhyme with the random keyword given
+                    </div>
                 </div>
-                <div className="text-[18px] md:text-[30px] px-[66px] pb-[13px] pt-[17px] bg-gradient-to-r from-teal-300 to-teal-300 rounded-[12px] md:rounded-[25px] flex-col justify-center items-center gap-2.5 flex">
-                    <button className="text-zinc-900 font-bold tracking-wider" onClick={() => router.push(`/freestyle/${difficulty}`)}>Reveal Word</button>
+
+                <div className='flex mt-[30px] justify-center h-[73px]'>
+                    <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[25px]">
+                        {difficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Easy.svg" height={24.57} width={40} alt={"Easy Icon"} className='mr-[10px] px-[5.775px]' /> Easy</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {difficulty === "medium" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Medium.svg" height={24.01} width={40} alt={"Medium Icon"} className='mr-[10px] px-[6.1px]' /> Medium</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {difficulty === "hard" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Hard.svg" height={26.3} width={40} alt={"Hard Icon"} className='mr-[10px] px-[2.265px]' /> Hard</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {difficultyMenuOpen && <div className="flex flex-col absolute bottom-0 bg-[#f4f5f6] dark:bg-[#25292D] w-[311px] rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
+                            <button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[10px] py-[15px] mt-[12px] justify-center items-start flex flex-col rounded-xl " + (difficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Easy.svg" height={24.57} width={40} alt={"Easy Icon"} className='mr-[10px] px-[5.775px]' /> Easy</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Good for beginners or for maximizing rhymes.</p>
+                            </button>
+                            <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[10px] py-[15px] my-[9px] justify-center items-start flex flex-col rounded-xl " + (difficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Medium.svg" height={24.01} width={40} alt={"Medium Icon"} className='mr-[10px] px-[6.1px]' /> Medium</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Little bit of a challenge to push your limit.</p>
+                            </button>
+                            <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[10px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl " + (difficulty === "hard" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/Hard.svg" height={26.3} width={40} alt={"Hard Icon"} className='mr-[10px] px-[2.265px]' /> Hard</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Some of the most difficult words to rhyme with.</p>
+                            </button>
+                        </div>}
+                    </div>
+                    <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] md:rounded-[25px] text-black text-[18px] md:text-[25px] font-bold md:w-[286px] font-[termina]" onClick={() => router.push(`/freestyle/${difficulty}`)}>PLAY</button>
+                    <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[25px]">
+                        {newGameMode === "4-Bar Mode" && !gameModeMenuOpen && <button type="button" onClick={() => handleGameModeButton("4-Bar Mode")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[25px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/icons/FourBarMode.svg" height={24} width={23} alt={"4-Bar Mode Icon"} className='mr-[10px]' /> 4-Bar Mode</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {newGameMode === "Rapid Fire Mode" && !gameModeMenuOpen && <button type="button" onClick={() => { }} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/icons/RapidFireMode.svg" height={24.01} width={40} alt={"Rapid Fire Mode Icon"} className='mr-[10px] px-[6.1px]' /> Rapid Fire Mode</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {newGameMode === "Endless Mode" && !gameModeMenuOpen && <button type="button" onClick={() => { }} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
+                            <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/icons/EndlessMode.svg" height={26.3} width={40} alt={"Endless Mode Icon"} className='mr-[10px] px-[2.265px]' /> Endless Mode</div>
+                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
+                        </button>}
+                        {gameModeMenuOpen && <div className="flex flex-col absolute bottom-0 bg-[#f4f5f6] dark:bg-[#25292D] w-[311px] rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
+                            <button type="button" onClick={() => handleGameModeButton("4-Bar Mode")} className={"px-[10px] py-[15px] mt-[12px] justify-center items-start flex flex-col rounded-xl " + (newGameMode === "4-Bar Mode" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/icons/FourBarMode.svg" height={24} width={23} alt={"4-Bar Mode Icon"} className='mr-[18.5px] ml-[8.5px]' /> 4-Bar Mode</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write 4 sentences that rhyme with the keyword within the time limit.</p>
+                            </button>
+                            <button type="button" onClick={() => { }} className={"px-[10px] py-[15px] my-[9px] justify-center items-start flex flex-col rounded-xl relative cursor-default"}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/icons/RapidFireMode.svg" height={27} width={21.6} alt={"Rapid Fire Mode Icon"} className='mr-[18.5px] ml-[8.5px]' /> Rapid Fire Mode</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write 2 sentences that rhyme with each keyword. Complete as many keywords as you can within the time limit.</p>
+                                <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
+                                    <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
+                                    <p className="text-[12px] text-white font-bold">Coming Soon</p>
+                                </div>
+                            </button>
+                            <button type="button" onClick={() => { }} className={"px-[10px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl relative cursor-default"}>
+                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/icons/EndlessMode.svg" height={12.15} width={25.15} alt={"Endless Mode Icon"} className='mr-[18.5px] ml-[8.5px]' /> Endless Mode</div>
+                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write as many sentences as possible that rhyme until you run out of lives.</p>
+                                <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
+                                    <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
+                                    <p className="text-[12px] text-white font-bold">Coming Soon</p>
+                                </div>
+                            </button></div>}
+                    </div>
                 </div>
             </div>
         </div>
-        <footer className="absolute bottom-0 w-full mx-auto text-center pb-[20px] opacity-50">
-            LLMC ©{new Date().getFullYear()}. All rights reserved.
+        <footer className="w-full mx-auto text-center pb-[20px] opacity-50 font-[neulis-sans] font-bold text-[#565757]">
+          ©{new Date().getFullYear()} LineZero Studio. All rights reserved.
         </footer>
-    </>
+    </div>
 }
