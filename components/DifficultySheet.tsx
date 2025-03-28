@@ -9,9 +9,16 @@ type DifficultyType = "easy" | "medium" | "hard";
 interface DifficultySheetProps {
   difficulty: DifficultyType;
   setDifficulty: (difficulty: DifficultyType) => void;
+  triggerClassName?: string;
+  simple?: boolean;
 }
 
-export function DifficultySheet({ difficulty, setDifficulty }: DifficultySheetProps) {
+export function DifficultySheet({ 
+  difficulty, 
+  setDifficulty, 
+  triggerClassName = "",
+  simple = false
+}: DifficultySheetProps) {
   // Control open state of the sheet
   const [open, setOpen] = useState(false);
   
@@ -21,8 +28,36 @@ export function DifficultySheet({ difficulty, setDifficulty }: DifficultySheetPr
     setOpen(false);
   };
 
-  const trigger = (
-    <div className="md:hidden bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[calc(100%-70px)] justify-center z-10 rounded-[10px]">
+  // Simple trigger for FreestyleForm
+  const simpleTrigger = (
+    <div className={`flex items-center gap-2 ${triggerClassName}`}>
+      <Image 
+        src={`/${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}.svg`} 
+        height={24} 
+        width={24} 
+        alt={`${difficulty} Icon`} 
+      />
+      <span className="text-[14px] font-bold">{difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
+      <Image 
+        src="/icons/ExpandDark.svg" 
+        height={16} 
+        width={16} 
+        alt="Expand" 
+        className="dark:hidden"
+      />
+      <Image 
+        src="/icons/Expand.svg" 
+        height={16} 
+        width={16} 
+        alt="Expand" 
+        className="hidden dark:block"
+      />
+    </div>
+  );
+
+  // Original trigger for StartSection
+  const originalTrigger = (
+    <div className={`md:hidden bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[calc(100%-70px)] justify-center z-10 rounded-[10px] ${triggerClassName}`}>
       <button type="button" className="justify-between items-center gap-2.5 flex flex-row flex-1 px-[5px]">
         <div className="text-[14px] font-bold tracking-wider flex flex-row mr-auto">
           {difficulty === "easy" && <><Image src="/Easy.svg" height={24.57} width={40} alt="Easy Icon" className='mr-[10px] px-[5.775px]' /> Easy</>}
@@ -39,7 +74,7 @@ export function DifficultySheet({ difficulty, setDifficulty }: DifficultySheetPr
 
   return (
     <BottomSheet 
-      trigger={trigger}
+      trigger={simple ? simpleTrigger : originalTrigger}
       title="Select Difficulty"
       open={open}
       onOpenChange={setOpen}

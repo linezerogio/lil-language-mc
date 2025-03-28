@@ -9,9 +9,16 @@ type GameModeType = "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode";
 interface ModeSelectSheetProps {
   gameMode: GameModeType;
   setGameMode: (gameMode: GameModeType) => void;
+  triggerClassName?: string;
+  simple?: boolean;
 }
 
-export function ModeSelectSheet({ gameMode, setGameMode }: ModeSelectSheetProps) {
+export function ModeSelectSheet({ 
+  gameMode, 
+  setGameMode,
+  triggerClassName = "",
+  simple = false 
+}: ModeSelectSheetProps) {
   // Control open state of the sheet
   const [open, setOpen] = useState(false);
   
@@ -22,8 +29,42 @@ export function ModeSelectSheet({ gameMode, setGameMode }: ModeSelectSheetProps)
     setOpen(false);
   };
 
-  const trigger = (
-    <div className="md:hidden bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[calc(100%-70px)] justify-center z-10 rounded-[10px]">
+  // Get display name for the selected mode
+  const displayName = gameMode === "4-Bar Mode" ? "4-Bar" : 
+                      gameMode === "Rapid Fire Mode" ? "Rapid Fire" : "Endless";
+
+  // Simple trigger for FreestyleForm
+  const simpleTrigger = (
+    <div className={`flex items-center gap-2 ${triggerClassName}`}>
+      <Image 
+        src={gameMode === "4-Bar Mode" ? "/icons/FourBarMode.svg" : 
+             gameMode === "Rapid Fire Mode" ? "/icons/RapidFireMode.svg" : 
+             "/icons/EndlessMode.svg"} 
+        height={24} 
+        width={24} 
+        alt={`${gameMode} Icon`} 
+      />
+      <span className="text-[14px] font-bold">{displayName}</span>
+      <Image 
+        src="/icons/ExpandDark.svg" 
+        height={16} 
+        width={16} 
+        alt="Expand" 
+        className="dark:hidden"
+      />
+      <Image 
+        src="/icons/Expand.svg" 
+        height={16} 
+        width={16} 
+        alt="Expand" 
+        className="hidden dark:block"
+      />
+    </div>
+  );
+
+  // Original trigger for StartSection
+  const originalTrigger = (
+    <div className={`md:hidden bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[calc(100%-70px)] justify-center z-10 rounded-[10px] ${triggerClassName}`}>
       <button type="button" className="justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]">
         <div className="text-[14px] font-bold tracking-wider flex flex-row mr-auto">
           {gameMode === "4-Bar Mode" && <><Image src="/icons/FourBarMode.svg" height={24} width={23} alt="4-Bar Mode Icon" className='mr-[10px]' /> 4-Bar</>}
@@ -40,7 +81,7 @@ export function ModeSelectSheet({ gameMode, setGameMode }: ModeSelectSheetProps)
 
   return (
     <BottomSheet 
-      trigger={trigger}
+      trigger={simple ? simpleTrigger : originalTrigger}
       title="Select Game Mode"
       open={open}
       onOpenChange={setOpen}

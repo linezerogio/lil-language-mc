@@ -21,6 +21,9 @@ interface BottomSheetProps {
   footer?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  className?: string;
+  contentClassName?: string;
+  header?: React.ReactNode;
 }
 
 // Create an animated version of SheetContent
@@ -33,7 +36,10 @@ export function BottomSheet({
   children, 
   footer,
   open: controlledOpen,
-  onOpenChange: setControlledOpen
+  onOpenChange: setControlledOpen,
+  className = "",
+  contentClassName = "",
+  header = null
 }: BottomSheetProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
   
@@ -144,7 +150,7 @@ export function BottomSheet({
       
       <AnimatedSheetContent 
         side="bottom" 
-        className="p-0 border-0 overflow-hidden bg-[#121212] dark:bg-[#121212] rounded-t-[20px]"
+        className={`p-0 border-0 overflow-hidden bg-[#F5F5F5] dark:bg-[#25292D] rounded-t-[20px] ${contentClassName}`}
         style={{ 
           transform: y.to(y => `translateY(${y}px)`),
           touchAction: 'none',
@@ -153,18 +159,18 @@ export function BottomSheet({
         {...bind()}
       >
         {/* Drag handle / notch */}
-        <div 
+        {header ? header : <div 
           className="w-12 h-1 bg-gray-500 rounded-full mx-auto my-3 cursor-grab touch-none"
           ref={sheetRef}
-        />
+        />}
         
-        <div className="px-6 pb-10">
+        <div className="px-6 pb-10 max-h-[80vh] overflow-y-auto">
           <SheetHeader className="mb-4">
             {title && <SheetTitle className="text-center text-white text-xl font-bold">{title}</SheetTitle>}
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
           
-          <div className="overflow-y-auto">{children}</div>
+          <div className="overflow-y-auto mb-8">{children}</div>
           
           {footer && <SheetFooter>{footer}</SheetFooter>}
         </div>

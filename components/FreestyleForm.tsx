@@ -13,6 +13,8 @@ import ScoreGauge from './ScoreGauge';
 import ScoreBreakdownView from './ScoreBreakdownView';
 import ScoreBreakdown from '@/types/breakdown';
 import Header from "./Header";
+import { DifficultySheet } from './DifficultySheet';
+import { ModeSelectSheet } from './ModeSelectSheet';
 
 const calculateColor = (percentage: number) => {
     return (percentage > 75 ? "bg-[#5DE3C8]" : (percentage > 50 ? "bg-[#5DE36A]" : (percentage > 25 ? "bg-[#E0E35D]" : (percentage > 10 ? "bg-[#FF7B01]" : "bg-[#FF0101]"))));
@@ -274,11 +276,23 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         )
     } else if (pageState === "score") {
         return (
-            <div className="max-w-[2560px] w-full h-full px-[100px] pt-[50px] mx-auto text-center flex flex-col">
+            <div className="max-w-[2560px] w-full h-full px-[30px] md:px-[100px] pt-[30px] md:pt-[50px] mx-auto text-center flex flex-col">
                 <Header />
-                <div className='flex items-center mt-5'>
-                    <ScoreGauge score={score} max={536} word={word} />
-                    <ScoreBreakdownView scoreBreakdown={scoreBreakdown} />
+                <div className='flex flex-col md:flex-row items-center mt-5'>
+                    <ScoreGauge 
+                        score={score} 
+                        max={536} 
+                        word={word} 
+                        scoreBreakdown={scoreBreakdown} 
+                        difficulty={difficulty}
+                        lines={lines}
+                    />
+                    <div className="md:hidden text-[14px] text-[#565757] dark:text-[#B2B2B2] -translate-y-[20px]">
+                        4-Bar Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)} "{word.charAt(0).toUpperCase() + word.slice(1)}"
+                    </div>
+                    <div className="hidden md:block">
+                        <ScoreBreakdownView scoreBreakdown={scoreBreakdown} />
+                    </div>
                 </div>
 
                 <div className='md:w-full flex flex-col flex-1 relative overflow-y-auto rounded-[12px] md:rounded-[25px]'>
@@ -300,7 +314,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     ))}
                 </div>
 
-                <div className='flex mt-[30px] justify-center h-[73px]'>
+                <div className='hidden md:flex mt-[30px] justify-center h-[73px]'>
                     <div className="bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative w-[311px] justify-center z-10 rounded-[25px]">
                         {newDifficulty === "easy" && !difficultyMenuOpen && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
                             <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}><Image src="/Easy.svg" height={24.57} width={40} alt={"Easy Icon"} className='mr-[10px] px-[5.775px]' /> Easy</div>
@@ -355,18 +369,33 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                                     <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
                                     <p className="text-[12px] text-white font-bold">Coming Soon</p>
                                 </div>
-                            </button>
-                            <button type="button" onClick={() => {}} className={"px-[10px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl relative cursor-default"}>
-                                <div className={"text-[14px] md:text-[25px] font-bold tracking-wider flex flex-row items-center"}><Image src="/icons/EndlessMode.svg" height={12.15} width={25.15} alt={"Endless Mode Icon"} className='mr-[18.5px] ml-[8.5px]' /> Endless Mode</div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write as many sentences as possible that rhyme until you run out of lives.</p>
-                                <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
-                                    <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
-                                    <p className="text-[12px] text-white font-bold">Coming Soon</p>
-                                </div>
                             </button></div>}
                     </div>
                 </div>
-                <footer className="w-full mx-auto text-center pb-[20px] pt-[40px] opacity-50 font-[neulis-sans] font-bold text-[#565757]">
+
+                <div className="md:hidden w-full h-[100px] mb-[20px] flex flex-col justify-between gap-[15px]">
+                    <div className="flex justify-center h-[42px] gap-[10px]">
+                        <DifficultySheet
+                            difficulty={newDifficulty}
+                            setDifficulty={setNewDifficulty}
+                        />
+
+                        {/* Mobile View */}
+                        <ModeSelectSheet
+                            gameMode={newGameMode}
+                            setGameMode={setNewGameMode}
+                        />
+                    </div>
+                    
+                    <button 
+                        className="bg-[#5CE2C7] h-[43px] w-full rounded-[12px] text-black text-[18px] font-bold font-[termina]" 
+                        onClick={() => reset()}
+                    >
+                        PLAY AGAIN
+                    </button>
+                </div>
+
+                <footer className="w-full mx-auto text-center pb-[20px] pt-[40px] opacity-50 font-[neulis-sans] font-bold text-[#565757] hidden md:block">
                     ©{new Date().getFullYear()} LineZero Studio. All rights reserved.
                 </footer>
             </div>

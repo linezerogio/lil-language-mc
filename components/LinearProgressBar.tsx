@@ -8,48 +8,38 @@ const cleanPercentage = (progress: number) => {
     return isNegativeOrNaN ? 0 : isTooHigh ? 100 : +progress;
   };
 
-export default function LinearProgressBar({ progress, height, strokeWidth, activeColor, inactiveColor } : { progress: number, height: number, strokeWidth: number, activeColor: string, inactiveColor: string }) {
-    const radius = height / 2;
-    const percentage = cleanPercentage(progress);
-    const svgRef = useRef<SVGSVGElement>(null);
-    const [svgWidth, setSvgWidth] = useState<number>(0);
+interface LinearProgressBarProps {
+  progress: number;
+  height: number;
+  strokeWidth: number;
+  activeColor: string;
+  inactiveColor: string;
+}
 
-    useEffect(() => {
-        if (svgRef.current) {
-            setSvgWidth(svgRef.current.clientWidth);
-        }
-    }, [svgRef.current]);
- 
-    useEffect(() => {
-        const handleResize = () => {
-            svgRef.current && setSvgWidth(svgRef.current.clientWidth);
-        };
- 
-        window.addEventListener('resize', handleResize);
- 
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-    
-    const activeWidth = (svgWidth - height) * (percentage / 100);
+const LinearProgressBar: React.FC<LinearProgressBarProps> = ({ 
+  progress, 
+  height, 
+  strokeWidth, 
+  activeColor, 
+  inactiveColor 
+}) => {
+  // Clamp progress between 0 and 100
+  const clampedProgress = Math.max(0, Math.min(100, progress));
   
-    return (
-      <svg ref={svgRef} width="100%" height={height} viewBox="0 0 ${svgWidth} ${height}">
-      <path
-        d={`M ${radius} ${radius} h ${svgWidth - height}`}
-        fill="none"
-        stroke={inactiveColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
+  return (
+    <div 
+      className="w-full rounded-full overflow-hidden" 
+      style={{ height: `${height}px`, backgroundColor: inactiveColor }}
+    >
+      <div 
+        className="h-full rounded-full transition-all duration-500 ease-out"
+        style={{ 
+          width: `${clampedProgress}%`, 
+          backgroundColor: activeColor 
+        }}
       />
-      <path
-        d={`M ${radius} ${radius} h ${activeWidth}`}
-        fill="none"
-        stroke={activeColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-      </svg>
-    );
-  };
+    </div>
+  );
+};
+
+export default LinearProgressBar;
