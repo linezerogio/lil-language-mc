@@ -12,7 +12,7 @@ import { totalTime } from '@/util/constants';
 import ScoreGauge from './ScoreGauge';
 import ScoreBreakdownView from './ScoreBreakdownView';
 import ScoreBreakdown from '@/types/breakdown';
-import Header from './Header';
+import Header from "./Header";
 
 const calculateColor = (percentage: number) => {
     return (percentage > 75 ? "bg-[#5DE3C8]" : (percentage > 50 ? "bg-[#5DE36A]" : (percentage > 25 ? "bg-[#E0E35D]" : (percentage > 10 ? "bg-[#FF7B01]" : "bg-[#FF0101]"))));
