@@ -18,6 +18,7 @@ export function ModeSelectSheet({ gameMode, setGameMode }: ModeSelectSheetProps)
   // Handle selection and close the sheet
   const handleSelection = (selected: GameModeType) => {
     setGameMode(selected);
+    // Make sure we close after selection
     setOpen(false);
   };
 

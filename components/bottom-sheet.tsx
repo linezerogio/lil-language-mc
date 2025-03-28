@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSpring, animated } from '@react-spring/web';
+import { useSpring, animated, config } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
 interface BottomSheetProps {
@@ -41,18 +41,66 @@ export function BottomSheet({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = setControlledOpen || setInternalOpen;
   
+  // Visual state for animation - this can be different from the actual open state
+  const [visualState, setVisualState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
+  
+  // Animation duration in ms - reduced for faster animations
+  const ANIMATION_DURATION = 150;
+  
   const sheetRef = useRef<HTMLDivElement>(null);
-  const [{ y }, api] = useSpring(() => ({ y: 0 }));
+  
+  // Spring for the sheet position
+  const [{ y }, api] = useSpring(() => ({ 
+    y: typeof window !== 'undefined' ? window.innerHeight : 800,
+    config: { ...config.default, duration: ANIMATION_DURATION }
+  }));
 
   // Track if we're currently dragging to prevent animation conflicts
   const [dragging, setDragging] = useState(false);
 
+  // Manage visual state based on open prop
+  useEffect(() => {
+    if (open && visualState === 'closed') {
+      setVisualState('opening');
+      api.start({ 
+        y: 0, 
+        immediate: false,
+        config: { duration: ANIMATION_DURATION },
+        onRest: () => setVisualState('open')
+      });
+    } else if (!open && (visualState === 'open' || visualState === 'opening')) {
+      setVisualState('closing');
+      api.start({ 
+        y: typeof window !== 'undefined' ? window.innerHeight : 800, 
+        immediate: false,
+        config: { duration: ANIMATION_DURATION },
+        onRest: () => setVisualState('closed')
+      });
+    }
+  }, [open, api, visualState]);
+
+  // Handle closing the sheet with animation
+  const handleClose = () => {
+    if (visualState === 'closing') return; // Prevent multiple close calls
+    
+    setVisualState('closing');
+    api.start({ 
+      y: typeof window !== 'undefined' ? window.innerHeight : 800, 
+      immediate: false,
+      config: { duration: ANIMATION_DURATION },
+      onRest: () => {
+        setVisualState('closed');
+        setOpen(false);
+      }
+    });
+  };
+
   // Gesture binding for interactive drag-to-dismiss
   const bind = useDrag(
-    ({ down, movement: [_, my], velocity: [__, vy], direction: [___, dy], cancel }) => {
+    ({ down, movement: [_, my], velocity: [__, vy], direction: [___, dy] }) => {
       // Only allow downward drag
       if (my < 0) {
-        if (down) api.start({ y: 0 });
+        if (down) api.start({ y: 0, immediate: true });
         return;
       }
 
@@ -68,29 +116,30 @@ export function BottomSheet({
       const shouldClose = my > 100 || (vy > 0.5 && dy > 0);
       
       if (shouldClose) {
-        setOpen(false);
-        api.start({ y: 0, immediate: false });
+        handleClose();
       } else {
         // Snap back with spring animation
         api.start({ 
           y: 0, 
           immediate: false,
-          config: { tension: 300, friction: 30 }
+          config: { tension: 300, friction: 30, duration: 0 }
         });
       }
     },
     { filterTaps: true, bounds: { top: 0 }, rubberband: true }
   );
 
-  // Reset y position when sheet closes or opens
-  React.useEffect(() => {
-    if (!dragging) {
-      api.start({ y: 0, immediate: !open });
-    }
-  }, [open, api, dragging]);
-
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet 
+      open={open || visualState !== 'closed'} 
+      onOpenChange={(newOpen) => {
+        if (!newOpen && visualState === 'open') {
+          handleClose();
+        } else {
+          setOpen(newOpen);
+        }
+      }}
+    >
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       
       <AnimatedSheetContent 
@@ -98,7 +147,8 @@ export function BottomSheet({
         className="p-0 border-0 overflow-hidden bg-[#121212] dark:bg-[#121212] rounded-t-[20px]"
         style={{ 
           transform: y.to(y => `translateY(${y}px)`),
-          touchAction: 'none' 
+          touchAction: 'none',
+          visibility: visualState === 'closed' ? 'hidden' : 'visible'
         }}
         {...bind()}
       >
