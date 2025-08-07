@@ -3,6 +3,8 @@ import Image from 'next/image'
 import ScoreBreakdown from '@/types/breakdown';
 import { Progress } from '@radix-ui/react-progress';
 import LinearProgressBar from './LinearProgressBar';
+import useIsMobile from '../hooks/useIsMobile';
+import ScoreDetailsBottomSheet from './BottomSheets/ScoreDetailsBottomSheet';
 
 type Modifier = {
     text: string;
@@ -15,14 +17,18 @@ interface ScoreBreakdownSectionProps {
     percentage: number;
     modifiers: Modifier[];
     showInfo: boolean;
-    setShowInfo: React.Dispatch<React.SetStateAction<boolean>>;
+    onInfoClick: () => void;
 }
 
 interface ScoreBreakdownViewProps {
     scoreBreakdown: ScoreBreakdown;
+    lines?: string[];
+    mode?: string;
+    difficulty?: string;
+    targetWord?: string;
 }
 
-const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, percentage, modifiers, showInfo, setShowInfo }) => {
+const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, percentage, modifiers, showInfo, onInfoClick }) => {
     const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     useEffect(() => {
@@ -47,7 +53,7 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
                             </div>
                         </div>
                         <p className="text-[24px] font-semibold">{type}</p>
-                        <button className='ml-auto min-w-[30px] min-h-[30px] justify-end flex items-center' onClick={() => setShowInfo(!showInfo)}>
+                        <button className='ml-auto min-w-[30px] min-h-[30px] justify-end flex items-center' onClick={onInfoClick}>
                             <Image src="/icons/Info.svg" width={20} height={20} alt="Info Icon" className='' />
                         </button>
                     </div>
@@ -69,10 +75,20 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
         );
 }
 
-const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown }) => {
+const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown, lines = [], mode = "4-Bar Mode", difficulty = "Easy", targetWord = "Sword" }) => {
     const [showInfo, setShowInfo] = useState<boolean>(false);
+    const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
+    const isMobile = useIsMobile();
 
     const { rhymeBreakdown, flowBreakdown, lengthBreakdown, speedBreakdown } = scoreBreakdown;
+
+    const handleInfoButtonClick = () => {
+        if (isMobile) {
+            setScoreDetailsBottomSheetOpen(true);
+        } else {
+            setShowInfo(!showInfo);
+        }
+    };
 
     const rhymeModifiers: Modifier[] = [
         { text: "Ended with Punchline", positive: true, number: rhymeBreakdown.endedWithPunchline ? 1 : 0},
@@ -101,7 +117,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown 
 
     return (
         <div className='bg-white dark:bg-[#1B1C1D] flex flex-1 rounded-[25px] ml-[45px] my-[43px] overflow-x-auto'>
-            {showInfo && <div className='absolute top-0 left-0 w-full h-full bg-[#000000bb] z-20'>
+            {showInfo && !isMobile && <div className='absolute top-0 left-0 w-full h-full bg-[#000000bb] z-20'>
                 <div className='relative bg-white dark:bg-[#1B1C1D] flex w-[1058px] h-[199px] top-[calc(50vh-99.5px)] left-[calc(50vw-529px)] bottom-0 rounded-[25px]'>
                 <button className='absolute top-[25px] right-[25px] w-[15px] h-[15px] z-30' onClick={() => setShowInfo(!showInfo)}>
                     <Image src="/icons/Close.svg" width={20} height={20} alt="Close Icon" />
@@ -130,10 +146,21 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown 
                 ))}
                 </div>
             </div>}
-            <ScoreBreakdownSection type="Rhyme" percentage={rhymeBreakdown.percentage * 100} modifiers={rhymeModifiers} showInfo={showInfo} setShowInfo={setShowInfo} />
-            <ScoreBreakdownSection type="Flow" percentage={flowBreakdown.percentage * 100} modifiers={flowModifiers} showInfo={showInfo} setShowInfo={setShowInfo} />
-            <ScoreBreakdownSection type="Length" percentage={lengthBreakdown.percentage * 100} modifiers={lengthModifiers} showInfo={showInfo} setShowInfo={setShowInfo} />
-            <ScoreBreakdownSection type="Speed" percentage={speedBreakdown.percentage * 100} modifiers={speedModifiers} showInfo={showInfo} setShowInfo={setShowInfo} />
+            <ScoreBreakdownSection type="Rhyme" percentage={rhymeBreakdown.percentage * 100} modifiers={rhymeModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
+            <ScoreBreakdownSection type="Flow" percentage={flowBreakdown.percentage * 100} modifiers={flowModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
+            <ScoreBreakdownSection type="Length" percentage={lengthBreakdown.percentage * 100} modifiers={lengthModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
+            <ScoreBreakdownSection type="Speed" percentage={speedBreakdown.percentage * 100} modifiers={speedModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
+            
+            {/* Bottom Sheet for Mobile */}
+            <ScoreDetailsBottomSheet
+                isOpen={scoreDetailsBottomSheetOpen}
+                onClose={() => setScoreDetailsBottomSheetOpen(false)}
+                scoreBreakdown={scoreBreakdown}
+                lines={lines}
+                mode={mode}
+                difficulty={difficulty}
+                targetWord={targetWord}
+            />
         </div>
     );
 };

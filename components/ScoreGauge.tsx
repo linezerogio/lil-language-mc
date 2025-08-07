@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ScoreBreakdownSheet } from "./ScoreBreakdownSheet";
 import ScoreBreakdown from "@/types/breakdown";
 
 interface ScoreGaugeProps {
@@ -9,6 +8,7 @@ interface ScoreGaugeProps {
   scoreBreakdown: ScoreBreakdown;
   difficulty: string;
   lines: string[];
+  onScoreBreakdownClick: () => void;
 }
 
 const ScoreGauge: React.FC<ScoreGaugeProps> = ({
@@ -17,89 +17,77 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   word,
   scoreBreakdown,
   difficulty,
-  lines
+  lines,
+  onScoreBreakdownClick
 }) => {
   const [darkMode, setDarkMode] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
-      mediaQuery.addEventListener('change', handleChange);
-      return () => {
-        mediaQuery.removeEventListener('change', handleChange);
-      };
-    }
-  }, []);
-  
-  const percentage = (score / max) * 100;
-  const angle = (percentage / 100) * 270;
+  // Gauge geometry state
+  const [height, setHeight] = useState(432);
+  const [width, setWidth] = useState(432);
+  const [strokeWidth, setStrokeWidth] = useState(22);
 
-  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
-  const width = isMobile ? 280 : 432;
-  const height = isMobile ? 280 : 432;
-  const radius = Math.min(width, height) / 2 - 11;
+  // Derived geometry
+  const radius = width / 2 - 11;
   const centerX = width / 2;
-  const centerY = height / 2;
-
+  const centerY = width / 2;
   const startAngle = 45;
   const endAngle = 135;
+  const percentage = (score / max) * 100;
+  const angle = (percentage / 100) * 270;
   const endAngle2 = 45 - angle;
 
+  // Arc endpoints
   const startX = centerX - radius * Math.cos((startAngle * Math.PI) / 180);
   const startY = centerY + radius * Math.sin((startAngle * Math.PI) / 180);
   const endX = centerX - radius * Math.cos((endAngle * Math.PI) / 180);
   const endY = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
   const endX2 = centerX - radius * Math.cos((endAngle2 * Math.PI) / 180);
   const endY2 = centerY + radius * Math.sin((endAngle2 * Math.PI) / 180);
-
   const largeArcFlag = endAngle2 >= -135 ? 0 : 1;
 
-  const arrowSize = isMobile ? 10 : 15;
-  const arrowWidthBasedOnRotation = Math.abs(arrowSize * Math.sin((angle * Math.PI) / 180));
-  const arrowHeightBasedOnRotation = Math.abs(arrowSize * Math.cos((angle * Math.PI) / 180));
-  const arrowX = centerX - ((isMobile ? 102 : 160) + (arrowWidthBasedOnRotation)) * Math.cos(((endAngle2 - 2) * Math.PI) / 180);
-  const arrowY = centerY + ((isMobile ? 102 : 160) + (arrowHeightBasedOnRotation)) * Math.sin(((endAngle2 - 2) * Math.PI) / 180);
+  useEffect(() => {
+    const updateDimensions = () => {
+      setIsDesktop(window.innerWidth > 768);
+    };
 
-  const arrowAngle = angle + 137;
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  useEffect(() => {
+    setWidth(isDesktop ? 432 : 292);
+    setHeight(isDesktop ? 432 : 292);
+    setStrokeWidth(isDesktop ? 22 : 14);
+  }, [isDesktop]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   const inactiveTrackWidth = endAngle - startAngle;
   const gradientWidth = (inactiveTrackWidth * percentage) / 100;
 
-  // Mobile score gauge content (clickable for bottom sheet)
-  const MobileGaugeContent = (
-    <div className="w-[204px] h-[204px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-[40px] left-[40px]">
-      <div className="w-[170px] h-[170px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
-        <h1 className="text-[40px] leading-none font-bold tracking-[0.06em] pb-[12px] font-[termina]">
-          {score}
-        </h1>
-        <p className="text-[11px] tracking-[0.55px] leading-[normal] text-[#565757]">
-          Click for score details
-        </p>
-      </div>
-    </div>
-  );
-
-  // Desktop score gauge content
-  const DesktopGaugeContent = (
-    <div className="w-[320px] h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-14 left-14">
-      <div className="w-[285px] h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
-        <h1 className="text-[65px] leading-none font-bold tracking-[0.06em] py-[15px] font-[termina]">
-          {score}
-        </h1>
-        <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757]">
-          4-Bar Mode | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-        </p>
-        <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757]">
-          &quot;{word.charAt(0).toUpperCase() + word.substring(1)}&quot;
-        </p>
-      </div>
-    </div>
-  );
+  // Arrow position calculation - position at the outside edge of the inner circle
+  const innerCircleRadius = width > 320 ? 160 : 112; // Desktop: 320px/2, Mobile: 224px/2
+  const arrowRadius = innerCircleRadius; // Position arrow slightly outside the inner circle
+  const arrowAngle = endAngle2; // Use the same angle as the end of the active track
+  const arrowX = centerX - arrowRadius * Math.cos((arrowAngle * Math.PI) / 180);
+  const arrowY = centerY + arrowRadius * Math.sin((arrowAngle * Math.PI) / 180);
+  
+  // Arrow rotation to point toward the center
+  const arrowRotation = 220 - arrowAngle; // Adjust rotation so arrow points inward
 
   return (
-    <div className="relative">
+    <div className="relative" onClick={!isDesktop ? onScoreBreakdownClick : undefined}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <defs>
           <linearGradient id="inactiveTrackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -116,39 +104,47 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           fill="none"
           stroke="url(#inactiveTrackGradient)"
           strokeOpacity={0.2}
-          strokeWidth="14"
+          strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
         <path
           d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX2} ${endY2}`}
           fill="none"
           stroke="url(#activeTrackGradient)"
-          strokeWidth="14"
+          strokeWidth={strokeWidth}
           strokeLinecap="round"
+          className="-z-10"
         />
-        <path
-          d={`M ${arrowX} ${arrowY - arrowSize}
-             L ${arrowX + arrowSize} ${arrowY}
-             L ${arrowX} ${arrowY + arrowSize}
-             Z`}
-          fill={darkMode ? "#F5F5F5" : "#000000"}
-          transform={`rotate(${arrowAngle} ${arrowX + (arrowSize / 2)} ${arrowY + (arrowSize / 2)})`}
-        />
+        {/* Arrow pointing to the end of active track */}
+        <g transform={`translate(${arrowX}, ${arrowY}) rotate(${arrowRotation})`}>
+          <image
+            href="/icons/gauge_arrow.svg"
+            width="15"
+            height="16"
+            x="-7.5"
+            y="-8"
+            z={100}
+            style={{
+              filter: darkMode ? 'invert(0.96) sepia(0.06) saturate(0.18) hue-rotate(27deg) brightness(0.95) contrast(0.95)' : 'none'
+            }}
+          />
+        </g>
       </svg>
-      
-      {/* Responsive display - Mobile vs Desktop */}
-      <div className="hidden md:block">
-        {DesktopGaugeContent}
-      </div>
-      
-      <div className="md:hidden">
-        <ScoreBreakdownSheet 
-          scoreBreakdown={scoreBreakdown} 
-          trigger={MobileGaugeContent}
-          word={word}
-          difficulty={difficulty}
-          lines={lines}
-        />
+      <div className="w-[224px] md:w-[320px] h-[224px] md:h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-9 md:top-14 left-9 md:left-14">
+        <div className="w-[200px] md:w-[285px] h-[200px] md:h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
+          <h1 className="text-[56px] md:text-[65px] leading-none font-bold tracking-[0.06em] py-[15px] font-[termina]">
+            {score}
+          </h1>
+          <p className="md:hidden text-[12px] tracking-[0.6px] leading-[normal] text-[#565757]">
+            Click for score details
+          </p>
+          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden md:block">
+            4-Bar Mode | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+          </p>
+          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden md:block">
+            &quot;{word.charAt(0).toUpperCase() + word.substring(1)}&quot;
+          </p>
+        </div>
       </div>
     </div>
   );
