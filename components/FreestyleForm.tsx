@@ -16,7 +16,6 @@ import Header from './Header';
 import useIsMobile from '../hooks/useIsMobile';
 import DifficultyBottomSheet from './BottomSheets/DifficultyBottomSheet';
 import ModeBottomSheet from './BottomSheets/ModeBottomSheet';
-import { ScoreBreakdownSheet } from './ScoreBreakdownSheet';
 import ScoreDetailsBottomSheet from './BottomSheets/ScoreDetailsBottomSheet';
 
 const calculateColor = (percentage: number) => {
