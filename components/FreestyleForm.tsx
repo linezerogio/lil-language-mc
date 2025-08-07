@@ -22,6 +22,7 @@ const calculateColor = (percentage: number) => {
     return (percentage > 75 ? "bg-[#5DE3C8]" : (percentage > 50 ? "bg-[#5DE36A]" : (percentage > 25 ? "bg-[#E0E35D]" : (percentage > 10 ? "bg-[#FF7B01]" : "bg-[#FF0101]"))));
 }
 
+
 // Simple cn utility for conditional classNames
 function cn(...args: any[]) {
     return args
