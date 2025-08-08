@@ -76,9 +76,8 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
       >
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
 
-        <Sheet.Content
-        >
-          <div className="flex flex-col gap-5 !bg-[#f4f5f6] dark:!bg-[#25292D] px-5">
+        <Sheet.Content>
+          <div className="flex flex-col gap-5 !bg-[#f4f5f6] dark:!bg-[#25292D] px-5 pb-safe">
             {/* Header with mode/difficulty info and expand button */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 justify-center">

@@ -54,7 +54,7 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
     <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[0.45]}>
       <Sheet.Container className="!bg-[#f4f5f6] dark:!bg-[#25292D] rounded-[25px]">
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
-        <Sheet.Content className="px-6 pb-6 !bg-[#f4f5f6] dark:!bg-[#25292D]">
+        <Sheet.Content className="px-6 pb-safe !bg-[#f4f5f6] dark:!bg-[#25292D]">
           <div className="flex flex-col">
             
             <button

@@ -84,8 +84,15 @@ h1 {
 
 .react-modal-sheet-content {
   background: transparent !important;
+  /* Ensure content isn't hidden behind mobile browser bars */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
 }
 
 .react-modal-sheet-backdrop {
   background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Safe-area utility for custom sheets */
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
 }

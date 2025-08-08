@@ -164,7 +164,7 @@ export function BottomSheet({
           ref={sheetRef}
         />}
         
-        <div className="px-6 pb-10 max-h-[80vh] overflow-y-auto">
+        <div className="px-6 pb-10 pb-safe max-h-[80svh] overflow-y-auto">
           <SheetHeader className="mb-4">
             {title && <SheetTitle className="text-center text-white text-xl font-bold">{title}</SheetTitle>}
             {description && <SheetDescription>{description}</SheetDescription>}
