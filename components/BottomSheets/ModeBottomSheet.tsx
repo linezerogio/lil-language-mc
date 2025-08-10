@@ -51,7 +51,7 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
   };
 
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[0.7]}>
+    <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[400]}>
       <Sheet.Container className="!bg-[#f4f5f6] dark:!bg-[#25292D] rounded-[25px]">
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
         <Sheet.Content className="px-6 pb-safe !bg-[#f4f5f6] dark:!bg-[#25292D]">

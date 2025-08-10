@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Sheet, SheetRef } from "react-modal-sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 import ScoreBreakdown from "@/types/breakdown";
 import LinearProgressBar from "../LinearProgressBar";
@@ -55,6 +56,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
     breakdown;
 
   // Sample lines if not provided
+  const [showInfo, setShowInfo] = useState(false);
   const displayLines =
     lines.length > 0
       ? lines
@@ -69,7 +71,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      snapPoints={[0.7]}
+      snapPoints={[530]}
     >
       <Sheet.Container
         className="!bg-[#1B1C1D] rounded-t-[25px]"
@@ -87,17 +89,66 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                   {targetWord.charAt(0).toUpperCase() + targetWord.slice(1)}
                   &rdquo;
                 </h3>
-                <button className="w-4 h-4">
+                <button className="w-4 h-4" onClick={() => setShowInfo((v) => !v)}>
                   <Image
-                    src="/icons/Info.svg"
+                    src={showInfo ? "/icons/Close.svg" : "/icons/Info.svg"}
                     width={16}
                     height={16}
-                    alt="Info"
+                    alt={showInfo ? "Close" : "Info"}
                   />
                 </button>
               </div>
             </div>
-            <div className="overflow-y-auto max-h-[calc(60svh-60px)] pb-20 flex flex-col gap-5">
+            <Dialog open={showInfo} onOpenChange={setShowInfo}>
+              <DialogContent className="w-[90vw] max-w-[950px] rounded-[25px] p-6">
+                  <button
+                    className="absolute top-5 right-5 w-[20px] h-[20px]"
+                    onClick={() => setShowInfo(false)}
+                    aria-label="Close"
+                  >
+                    <Image src="/icons/Close.svg" width={20} height={20} alt="Close" />
+                  </button>
+                  <div className="grid grid-cols-2 gap-x-10 gap-y-8">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Image src="/icons/Rhyme.svg" width={24} height={24} alt="Rhyming" />
+                        <span className="text-black dark:text-white text-xl font-semibold">Rhyming</span>
+                      </div>
+                      <p className="text-[#565757] dark:text-[#B2B2B2] text-base leading-relaxed">
+                        The more exact and near rhymes you end your sentences with, the higher this score.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Image src="/icons/Flow.svg" width={24} height={24} alt="Flow" />
+                        <span className="text-black dark:text-white text-xl font-semibold">Flow</span>
+                      </div>
+                      <p className="text-[#565757] dark:text-[#B2B2B2] text-base leading-relaxed">
+                        Based on how often you have exact or near matching syllables.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Image src="/icons/Length.svg" width={24} height={24} alt="Length" />
+                        <span className="text-black dark:text-white text-xl font-semibold">Length</span>
+                      </div>
+                      <p className="text-[#565757] dark:text-[#B2B2B2] text-base leading-relaxed">
+                        The longer each of your sentences are, the higher this score will be.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Image src="/icons/Speed.svg" width={24} height={24} alt="Speed" />
+                        <span className="text-black dark:text-white text-xl font-semibold">Speed</span>
+                      </div>
+                      <p className="text-[#565757] dark:text-[#B2B2B2] text-base leading-relaxed">
+                        The more time remaining, the higher this score is.
+                      </p>
+                    </div>
+                  </div>
+              </DialogContent>
+            </Dialog>
+            <div className="overflow-y-auto max-h-[calc(467px)] pb-20 flex flex-col gap-5">
               {!isExpanded ? (
                 /* Collapsed View - 4-card grid */
                 <div className="grid grid-cols-2 gap-5">
