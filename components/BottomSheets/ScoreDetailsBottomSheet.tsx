@@ -69,7 +69,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      snapPoints={[0.6]}
+      snapPoints={[0.7]}
     >
       <Sheet.Container
         className="!bg-[#1B1C1D] rounded-t-[25px]"
