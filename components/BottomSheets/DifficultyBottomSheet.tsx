@@ -51,12 +51,12 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
     <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[320]}>
       <Sheet.Container className="!bg-[#f4f5f6] dark:!bg-[#25292D] rounded-[25px]">
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
-        <Sheet.Content className="px-6 pb-safe !bg-[#f4f5f6] dark:!bg-[#25292D]">
-          <div className="flex flex-col">
+        <Sheet.Content>
+          <div className="flex flex-col gap-5 !bg-[#f4f5f6] dark:!bg-[#25292D] px-5 pb-safe">
 
             <button
               onClick={() => handleDifficultySelect("easy")}
-              className={`px-[15px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl ${difficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
                 }`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
@@ -76,7 +76,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
 
             <button
               onClick={() => handleDifficultySelect("medium")}
-              className={`px-[15px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl ${difficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
                 }`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">

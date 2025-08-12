@@ -51,15 +51,15 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
   };
 
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[400]}>
+    <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[382]}>
       <Sheet.Container className="!bg-[#f4f5f6] dark:!bg-[#25292D] rounded-[25px]">
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
-        <Sheet.Content className="px-6 pb-safe !bg-[#f4f5f6] dark:!bg-[#25292D]">
-          <div className="flex flex-col">
+        <Sheet.Content>
+          <div className="flex flex-col gap-5 !bg-[#f4f5f6] dark:!bg-[#25292D] px-5 pb-safe">
             
             <button
               onClick={() => handleGameModeSelect("4-Bar Mode")}
-              className={`px-[15px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl ${
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${
                 gameMode === "4-Bar Mode" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
               }`}
             >
@@ -80,7 +80,7 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
 
             <button
               onClick={() => handleGameModeSelect("Rapid Fire Mode")}
-              className="px-[15px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl relative cursor-default"
+              className="px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl relative cursor-default"
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
                 <Image 

@@ -167,7 +167,7 @@ const Header: React.FC = () => {
 
       {/* Mobile dropdown menu */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 mt-2 w-full md:w-auto bg-white dark:bg-[#1b1c1d] rounded-xl shadow-lg z-50 flex flex-col gap-3 p-4 md:hidden">
+        <div className="absolute top-full right-0 mt-2 w-full md:w-auto dark:bg-white bg-[#1b1c1d] rounded-xl shadow-lg z-50 flex flex-col gap-3 p-4 md:hidden">
           <a
             href={links.linezeroStudio}
             className="bg-white dark:bg-[#1b1c1d] text-[#1b1c1d] dark:text-white text-[16px] flex gap-2.5 items-center py-[9px] px-[19px] rounded-xl font-[neulis-sans] font-bold tracking-wider border border-gray-200 dark:border-gray-700"

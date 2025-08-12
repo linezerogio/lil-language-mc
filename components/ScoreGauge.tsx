@@ -121,11 +121,11 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
             href="/icons/gauge_arrow.svg"
             width="15"
             height="16"
-            x="-7.5"
+            x="-8"
             y="-8"
             z={100}
             style={{
-              filter: darkMode ? 'invert(0.96) sepia(0.06) saturate(0.18) hue-rotate(27deg) brightness(0.95) contrast(0.95)' : 'none'
+              filter: darkMode ? 'none' : 'brightness(0) saturate(100%) invert(8%) sepia(6%) saturate(468%) hue-rotate(169deg) brightness(96%) contrast(92%)'
             }}
           />
         </g>
