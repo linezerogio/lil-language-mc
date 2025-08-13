@@ -116,7 +116,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
           </div>
         </Sheet.Content>
       </Sheet.Container>
-      <Sheet.Backdrop />
+      <Sheet.Backdrop onTap={onClose} />
     </Sheet>
   );
 };

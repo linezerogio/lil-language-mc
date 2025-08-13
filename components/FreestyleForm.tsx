@@ -40,6 +40,47 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     const [pageState, setPageState] = useState<'intro' | 'rapping' | 'score'>('intro');
 
     const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
+    const [showQuitConfirmation, setShowQuitConfirmation] = useState<boolean>(false);
+
+    // Handle browser back button for quit confirmation
+    useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            if (pageState === 'rapping') {
+                event.preventDefault();
+                setShowQuitConfirmation(true);
+                // Push the current state back to prevent actual navigation
+                window.history.pushState(null, '', window.location.href);
+            }
+        };
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (pageState === 'rapping') {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        };
+
+        if (pageState === 'rapping') {
+            // Add a history entry to catch back button
+            window.history.pushState(null, '', window.location.href);
+            window.addEventListener('popstate', handlePopState);
+            window.addEventListener('beforeunload', handleBeforeUnload);
+        }
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [pageState]);
+
+    const handleQuitConfirm = () => {
+        setShowQuitConfirmation(false);
+        router.replace('/');
+    };
+
+    const handleQuitCancel = () => {
+        setShowQuitConfirmation(false);
+    };
 
     useEffect(() => {
         if (countdownActive) {
@@ -320,54 +361,84 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         )
     } else if (pageState === "rapping") {
         return (
-            <div className="w-full px-[30px] md:px-[100px] pb-[30px] md:pb-[100px] pt-[25px] mx-auto flex flex-col h-[100vh]">
-                <div className={"absolute left-0 top-0 h-8 w-full"}>
-                    <div className={`h-full transition-width ease-linear duration-[990ms] ` + calculateColor(timePercentageLeft)} style={{ "width": timePercentageLeft + "%" }}></div>
-                </div>
-                <div className="flex flex-col w-auto pb-[36px] md:pb-[220px] pt-[36px] md:pt-[100px] mx-auto">
-                    <div className="flex w-auto content-center items-center">
-                        <h1 className='flex-1 text-center pt-[20px] hidden md:block leading-none font-bold tracking-[0.06em] font-display clamp-word'>
-                            {word.toUpperCase()}
-                        </h1>
-                        <h1 className='flex-1 text-center text-[40px] md:px-[100px] pt-[5px] md:pt-[20px] h-[40px] leading-none font-bold tracking-[0.06em] md:hidden font-display'>
-                            {word.toUpperCase()}
-                        </h1>
+            <>
+                <div className="w-full px-[30px] md:px-[100px] pb-[30px] md:pb-[100px] pt-[25px] mx-auto flex flex-col h-[100vh]">
+                    <div className={"absolute left-0 top-0 h-5 md:h-8 w-full"}>
+                        <div className={`h-full transition-width ease-linear duration-[990ms] ` + calculateColor(timePercentageLeft)} style={{ "width": timePercentageLeft + "%" }}></div>
                     </div>
-                    <div className="flex flex-col w-auto content-center items-center">
-                        <h2 className='flex-1 text-center text-[14px] md:text-[1.85vw] md:px-[100px] pt-[15px] leading-none font-bold tracking-[0.06em]'>
-                            Write 4 sentences that rhyme with the keyword
-                        </h2>
-                        <h3 className='flex-1 text-center text-[12px] md:text-[1.3vw] md:px-[100px] pt-[20px] leading-none tracking-[0.06em] text-[#8F8F8F]'>
-                            4-Bar Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)}
-                        </h3>
+                    <div className="flex flex-col w-auto pb-[36px] md:pb-[220px] pt-[36px] md:pt-[100px] mx-auto">
+                        <div className="flex w-auto content-center items-center">
+                            <h1 className='flex-1 text-center pt-[20px] hidden md:block leading-none font-bold tracking-[0.06em] font-display clamp-word'>
+                                {word.toUpperCase()}
+                            </h1>
+                            <h1 className='flex-1 text-center text-[40px] md:px-[100px] pt-[5px] md:pt-[20px] h-[40px] leading-none font-bold tracking-[0.06em] md:hidden font-display'>
+                                {word.toUpperCase()}
+                            </h1>
+                        </div>
+                        <div className="flex flex-col w-auto content-center items-center">
+                            <h2 className='flex-1 text-center text-[14px] md:text-[1.85vw] md:px-[100px] pt-[15px] leading-none font-bold tracking-[0.06em]'>
+                                Write 4 sentences that rhyme with the keyword
+                            </h2>
+                            <h3 className='flex-1 text-center text-[12px] md:text-[1.3vw] md:px-[100px] pt-[20px] leading-none tracking-[0.06em] text-[#8F8F8F]'>
+                                4-Bar Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div className='md:w-full flex flex-col flex-1 h-full relative overflow-y-auto rounded-[12px] md:rounded-[25px]'>
+                        {lines.map((line, index) => {
+                            return (
+                                <div key={index} className={'p-0 m-0 flex flex-col relative ' + (index === lines.length - 1 ? "flex-1" : "")}>
+                                    {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[15px] md:mt-[26px] ml-[15px] md:ml-[40px] dark:text-black'>{index + 1}</span>}
+                                    <TextareaAutosize
+                                        placeholder='Type your bars...'
+                                        ref={el => {
+                                            if (el) inputRefs.current[index] = el;
+                                        }}
+                                        onChange={e => {
+                                            updateLines(index, e.currentTarget.value);
+                                        }}
+                                        onKeyPress={(e) => {
+                                            handleKeyPress(e, index);
+                                        }}
+                                        value={line}
+                                        draggable={false}
+                                        className={"text-start text-[16px] md:text-2xl py-[15px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] dark:bg-[#1C1E1E] md:leading-snug " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8 flex-1" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8 flex-1" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#F5F5F5] dark:border-[#343737] pl-[50px] md:pl-[84.5px]" : "border-b-2 border-[#F5F5F5] dark:border-[#343737] pl-[50px] md:pl-[84.5px]")))}
+                                    ></TextareaAutosize>
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
 
-                <div className='md:w-full flex flex-col flex-1 h-full relative overflow-y-auto rounded-[12px] md:rounded-[25px]'>
-                    {lines.map((line, index) => {
-                        return (
-                            <div key={index} className={'p-0 m-0 flex flex-col relative ' + (index === lines.length - 1 ? "flex-1" : "")}>
-                                {index !== lines.length - 1 && <span className='rounded-full bg-[#5DE3C8] absolute w-6 h-6 text-center pt-[1.5px] mt-[15px] md:mt-[26px] ml-[15px] md:ml-[40px] dark:text-black'>{index + 1}</span>}
-                                <TextareaAutosize
-                                    placeholder='Type your bars...'
-                                    ref={el => {
-                                        if (el) inputRefs.current[index] = el;
-                                    }}
-                                    onChange={e => {
-                                        updateLines(index, e.currentTarget.value);
-                                    }}
-                                    onKeyPress={(e) => {
-                                        handleKeyPress(e, index);
-                                    }}
-                                    value={line}
-                                    draggable={false}
-                                    className={"text-start text-[14px] md:text-2xl py-[15px] md:pt-[24px] pr-[15px] md:pr-[40px] dark:text-[#E1E3E3] dark:bg-[#1C1E1E] md:leading-snug " + (index === lines.length - 1 && index === 0 ? "rounded-[12px] md:rounded-[25px] pl-8 flex-1" : (index === lines.length - 1 ? "rounded-b-[12px] md:rounded-b-[25px] pl-8 flex-1" : (index === 0 ? "rounded-t-[12px] md:rounded-t-[25px] border-b-2 border-[#F5F5F5] dark:border-[#343737] pl-[50px] md:pl-[84.5px]" : "border-b-2 border-[#F5F5F5] dark:border-[#343737] pl-[50px] md:pl-[84.5px]")))}
-                                ></TextareaAutosize>
+                {/* Quit Confirmation Modal */}
+                {showQuitConfirmation && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-[#1B1C1D] rounded-[25px] p-6 max-w-sm w-full">
+                            <h3 className="text-xl font-bold text-center mb-4 text-black dark:text-white">
+                                Quit Session?
+                            </h3>
+                            <p className="text-center text-[#565757] dark:text-[#B2B2B2] mb-6">
+                                Are you sure you want to quit? Your progress will be lost.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleQuitCancel}
+                                    className="flex-1 py-3 px-4 bg-[#F5F5F5] dark:bg-[#343737] rounded-[12px] text-black dark:text-white font-semibold"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleQuitConfirm}
+                                    className="flex-1 py-3 px-4 bg-[#FF4444] rounded-[12px] text-white font-semibold"
+                                >
+                                    Quit
+                                </button>
                             </div>
-                        )
-                    })}
-                </div>
-            </div>
+                        </div>
+                    </div>
+                )}
+            </>
         )
     } else if (pageState === "score") {
         return (

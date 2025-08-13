@@ -65,6 +65,7 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setDarkMode(mediaQuery.matches); // Set initial state
     const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
 
     mediaQuery.addEventListener('change', handleChange);

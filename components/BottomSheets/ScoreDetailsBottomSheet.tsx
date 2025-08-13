@@ -31,7 +31,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
 
-    mediaQuery.addEventListener('change', handleChange);  
+    mediaQuery.addEventListener('change', handleChange);
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
     };
@@ -159,7 +159,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                 </div>
               </DialogContent>
             </Dialog>
-            <div className="overflow-y-auto max-h-[calc(467px)] pb-20 flex flex-col gap-5">
+            <div className="overflow-y-auto h-[calc(467px)] pb-20 flex flex-col gap-5">
               {!isExpanded ? (
                 /* Collapsed View - 4-card grid */
                 <div className="grid grid-cols-2 gap-5">
@@ -456,23 +456,13 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                             alt={"Expand Arrow"}
                             className="dark:hidden ml-[4px] px-[3px] py-[2px]"
                           />
-
-                          <div>
-                            <Image
-                              src="/icons/ExpandDark.svg"
-                              height={16}
-                              width={16}
-                              alt={"Expand Arrow"}
-                              className="dark:hidden ml-[4px] px-[3px] py-[2px]"
-                            />
-                            <Image
-                              src="/icons/Expand.svg"
-                              height={16}
-                              width={16}
-                              alt={"Expand Arrow"}
-                              className="hidden dark:block ml-[4px] px-[3px] py-[2px]"
-                            />
-                          </div>
+                          <Image
+                            src="/icons/Expand.svg"
+                            height={16}
+                            width={16}
+                            alt={"Expand Arrow"}
+                            className="hidden dark:block ml-[4px] px-[3px] py-[2px]"
+                          />
                         </div>
                       </div>
                       <LinearProgressBar
@@ -564,7 +554,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                         height={8}
                         strokeWidth={8}
                         activeColor="#5CE2C7"
-                        inactiveColor={darkMode ? "#343737" : "#F5F5F5"}  
+                        inactiveColor={darkMode ? "#343737" : "#F5F5F5"}
                       />
                       <div className="mt-4 space-y-2">
                         {lengthBreakdown.longSentences > 0 && (
@@ -645,7 +635,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                         height={8}
                         strokeWidth={8}
                         activeColor="#5CE2C7"
-                        inactiveColor={darkMode ? "#343737" : "#F5F5F5"}  
+                        inactiveColor={darkMode ? "#343737" : "#F5F5F5"}
                       />
                       <div className="mt-4 space-y-2">
                         {speedBreakdown.timeRemaining > 0 && (
@@ -700,7 +690,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
           </div>
         </Sheet.Content>
       </Sheet.Container>
-      <Sheet.Backdrop />
+      <Sheet.Backdrop onTap={onClose} />
     </Sheet>
   );
 };
