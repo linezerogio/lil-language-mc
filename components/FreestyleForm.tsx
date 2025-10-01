@@ -7,7 +7,7 @@ import { arraysEqual, getLastWord, getTimePercentageClass } from '@/util';
 import { getRhymeData } from '@/util/rhymes';
 import { getScore, perfectRhymeScore, nearRhymeScore, maybeRhymeScore, getSyllableMatch, getBonusPoints, getComplexity, getPenalty, getWordCountPenalty, getRepeatPenalty, getSyllableMatchCount, getSentenceLengthInfo } from '@/util/score';
 import { Difficulty } from '@/types/difficulty';
-import TextareaAutosize from 'react-autosize-textarea';
+import TextareaAutosize from 'react-textarea-autosize';
 import { totalTime } from '@/util/constants';
 import ScoreGauge from './ScoreGauge';
 import ScoreBreakdownView from './ScoreBreakdownView';

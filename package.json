@@ -1,5 +1,5 @@
 {
-  "name": "nextjs",
+  "name": "llmc",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,8 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-progress": "^1.0.3",
+    "@react-spring/web": "^9.7.3",
+    "@use-gesture/react": "^10.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
     "compromise": "^14.10.1",
@@ -19,16 +21,16 @@
     "lottie-react": "^2.4.0",
     "next": "14.0.3",
     "postgres": "^3.4.3",
+    "posthog-js": "^1.268.9",
+    "posthog-node": "^5.9.2",
     "random-words": "^2.0.0",
     "react": "^18",
-    "react-autosize-textarea": "^7.1.0",
     "react-dom": "^18",
     "react-modal-sheet": "^4.4.0",
+    "react-textarea-autosize": "^8.5.9",
     "syllable": "^5.0.1",
     "tailwind-merge": "^2.1.0",
-    "tinygradient": "^1.1.5",
-    "@use-gesture/react": "^10.1.1",
-    "@react-spring/web": "^9.7.3"
+    "tinygradient": "^1.1.5"
   },
   "devDependencies": {
     "@types/node": "^20",

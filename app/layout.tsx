@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './font.css'
 import './globals.css'
+import { PostHogProvider } from '../components/PostHogProvider'
 
 export const metadata: Metadata = {
   title: 'LLMC',
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   )
