@@ -18,7 +18,7 @@ const Header: React.FC = () => {
 
   return (
     <div className="flex justify-between w-full items-center relative">
-      <div className="flex-col hidden md:flex">
+      <div className="flex-col hidden lg:flex">
         <div className="font-extrabold text-collection-1-light-gray text-[39px] tracking-[1.95px] leading-[normal] text-start">
           LLMC
         </div>
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-col md:hidden">
+      <div className="flex-col lg:hidden">
         <svg
           width="53"
           height="26"
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
       </div>
 
       {/* Desktop navigation */}
-      <div className="hidden md:flex gap-5">
+      <div className="hidden lg:flex gap-5">
         <a
           href={links.linezeroStudio}
           className="bg-white dark:bg-[#1b1c1d] text-[#1b1c1d] dark:text-white text-[16px] flex gap-2.5 items-center py-[9px] px-[19px] rounded-xl font-[neulis-sans] font-bold tracking-wider"
@@ -125,7 +125,7 @@ const Header: React.FC = () => {
 
       {/* Mobile menu button */}
       <button
-        className="md:hidden text-[#1b1c1d] dark:text-white"
+        className="lg:hidden text-[#1b1c1d] dark:text-white"
         onClick={toggleMenu}
         aria-label="Toggle menu"
         aria-expanded={isMenuOpen}
@@ -167,7 +167,7 @@ const Header: React.FC = () => {
 
       {/* Mobile dropdown menu */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 mt-2 w-full md:w-auto dark:bg-white bg-[#1b1c1d] rounded-xl shadow-lg z-50 flex flex-col gap-3 p-4 md:hidden">
+        <div className="absolute top-full right-0 mt-2 w-full lg:w-auto dark:bg-white bg-[#1b1c1d] rounded-xl shadow-lg z-50 flex flex-col gap-3 p-4 lg:hidden">
           <a
             href={links.linezeroStudio}
             className="bg-white dark:bg-[#1b1c1d] text-[#1b1c1d] dark:text-white text-[16px] flex gap-2.5 items-center py-[9px] px-[19px] rounded-xl font-[neulis-sans] font-bold tracking-wider border border-gray-200 dark:border-gray-700"

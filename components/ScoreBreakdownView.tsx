@@ -46,7 +46,7 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
                 <div className='flex flex-col h-[76px] w-full'>
                     <div className='flex items-center mb-[10px] h-[50px]'>
                         <div className='flex items-center w-[50px] h-full'>
-                            <div className='relative w-[16.17px] h-[19.2px] md:w-[33.33px] md:h-[39.58px] mr-[10px]'>
+                            <div className='relative w-[16.17px] h-[19.2px] lg:w-[33.33px] lg:h-[39.58px] mr-[10px]'>
                                 <Image src={`/icons/${type}.svg`}
                                     layout='fill'
                                     objectFit='contain' alt={`${type} Icon`} />
@@ -127,7 +127,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown,
                     <div className='flex flex-col h-[76px] w-full'>
                         <div className='flex items-center mb-[15px] h-[50px]'>
                             <div className='flex items-center w-[50px] h-full'>
-                                <div className='relative w-[16.17px] h-[19.2px] md:w-[33.33px] md:h-[39.58px] mr-[10px]'>
+                                <div className='relative w-[16.17px] h-[19.2px] lg:w-[33.33px] lg:h-[39.58px] mr-[10px]'>
                                     <Image src={`/icons/${type}.svg`}
                                         layout='fill'
                                         objectFit='contain' alt={`${type} Icon`} />

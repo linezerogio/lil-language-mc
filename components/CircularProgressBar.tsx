@@ -55,7 +55,7 @@ export default function CircularProgressBar({ progress, text, gradient }: { prog
 
   return (
     <>
-    <svg className="block md:hidden z-10" width={60} height={60}>
+    <svg className="block lg:hidden z-10" width={60} height={60}>
     <defs>
         <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor={gradient[0]}/>
@@ -68,7 +68,7 @@ export default function CircularProgressBar({ progress, text, gradient }: { prog
       </g>
       <Text text={text} mobile={true} />
     </svg>
-    <svg className="hidden md:block" width={200} height={200}>
+    <svg className="hidden lg:block" width={200} height={200}>
     <defs>
         <linearGradient id="linear2" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor={gradient[0]}/>

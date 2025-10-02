@@ -131,18 +131,18 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           />
         </g>
       </svg>
-      <div className="w-[224px] md:w-[320px] h-[224px] md:h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-9 md:top-14 left-9 md:left-14">
-        <div className="w-[200px] md:w-[285px] h-[200px] md:h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
-          <h1 className="text-[56px] md:text-[65px] leading-none font-bold tracking-[0.06em] py-[15px] font-[termina]">
+      <div className="w-[224px] lg:w-[320px] h-[224px] lg:h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-9 lg:top-14 left-9 lg:left-14">
+        <div className="w-[200px] lg:w-[285px] h-[200px] lg:h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
+          <h1 className="text-[56px] lg:text-[65px] leading-none font-bold tracking-[0.06em] py-[15px] font-[termina]">
             {score}
           </h1>
-          <p className="md:hidden text-[12px] tracking-[0.6px] leading-[normal] text-[#565757]">
+          <p className="lg:hidden text-[12px] tracking-[0.6px] leading-[normal] text-[#565757]">
             Click for score details
           </p>
-          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden md:block">
+          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
             4-Bar Mode | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
           </p>
-          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden md:block">
+          <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
             &quot;{word.charAt(0).toUpperCase() + word.substring(1)}&quot;
           </p>
         </div>

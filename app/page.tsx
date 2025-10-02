@@ -12,7 +12,7 @@ export default async function Home() {
   const word = await getWordByDifficulty("medium");
 
   return (
-    <main className='w-full max-w-[2560px] md:mx-auto h-full'>
+    <main className='w-full max-w-[2560px] lg:mx-auto h-full'>
       <StartSection />
     </main>
   )
