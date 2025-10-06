@@ -596,7 +596,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                         onClose={() => setDifficultyMenuOpen(false)}
                         isMenuOpen={difficultyMenuOpen}
                     />
-                    <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black dark:text-white text-[18px] lg:text-[25px] font-bold font-[termina] hidden lg:block w-full lg:w-[286px]" onClick={() => reset()}>PLAY AGAIN</button>
+                    <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black text-[18px] lg:text-[25px] font-bold font-[termina] hidden lg:block w-full lg:w-[286px]" onClick={() => reset()}>PLAY AGAIN</button>
                     <ModeSelector
                         options={gameModeOptions}
                         selectedMode={newGameMode}
