@@ -34,6 +34,7 @@ function cn(...args: any[]) {
 export default function FreestyleForm({ word, difficulty }: { word: string, difficulty: Difficulty }) {
     const router = useRouter();
     const isMobile = useIsMobile();
+  const effectiveTotalTime = useMemo(() => (difficulty === 'zbra-easy' ? totalTime * 2 : totalTime), [difficulty]);
 
     const [countdownTimeLeft, setCountdownTimeLeft] = useState(3);
     const [countdownActive, setCountdownActive] = useState<boolean>(true);
@@ -93,15 +94,15 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         }
     }, [countdownTimeLeft, countdownActive]);
 
-    const [timePercentageLeft, setTimePercentageLeft] = useState(100);
-    const [timeLeft, setTimeLeft] = useState(totalTime);
+  const [timePercentageLeft, setTimePercentageLeft] = useState(100);
+  const [timeLeft, setTimeLeft] = useState(effectiveTotalTime);
 
-    useEffect(() => {
+  useEffect(() => {
         timeLeft > 0 && pageState === "rapping" && setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-        timePercentageLeft > 0 && pageState === "rapping" && setTimeout(() => setTimePercentageLeft(timeLeft / totalTime * 100), 1000)
+        timePercentageLeft > 0 && pageState === "rapping" && setTimeout(() => setTimePercentageLeft(timeLeft / effectiveTotalTime * 100), 1000)
         timeLeft < 1 && setTimeout(() => submit(), 1000)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [timeLeft, pageState, timePercentageLeft]);
+    }, [timeLeft, pageState, timePercentageLeft, effectiveTotalTime]);
 
     const [lines, setLines] = useState<string[]>(['']);
     const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
@@ -306,11 +307,11 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         handleGameModeButton(mode as "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode");
     };
 
-    const reset = () => {
+  const reset = () => {
         setPageState('intro');
         setCountdownTimeLeft(3);
         setCountdownActive(true);
-        setTimeLeft(totalTime);
+        setTimeLeft(effectiveTotalTime);
         setTimePercentageLeft(100);
         setLines(['']);
         setScore(0);
