@@ -128,7 +128,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
                   ZBRA Easy
                 </div>
                 <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
-                  Good for beginner Zbra's so they can finally reach 500 pts maybe.
+                  Good for beginner Zbra&apos;s so they can finally reach 500 pts maybe.
                 </p>
               </button>
             )}
@@ -149,7 +149,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
                   ZBRA Hard
                 </div>
                 <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
-                  Very difficult, only for the trained zbra's, not just any zbra.
+                  Very difficult, only for the trained zbra&apos;s, not just any zbra.
                 </p>
               </button>
             )}
