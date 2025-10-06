@@ -1,77 +1,241 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { Difficulty } from "@/types/difficulty";
 
 const links = {
   linezeroStudio: "https://linezerostudio.webflow.io",
   buyMeACoffee: "https://buymeacoffee.com/linezerostudio",
 };
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  difficulty?: Difficulty;
+  onDifficultyChange?: (difficulty: Difficulty) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ difficulty, onDifficultyChange }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEasterEggOpen, setIsEasterEggOpen] = useState(false);
+  const easterEggDesktopRef = useRef<HTMLDivElement>(null);
+  const easterEggMobileRef = useRef<HTMLDivElement>(null);
+  const selectedDifficulty: Difficulty = (difficulty || 'easy') as Difficulty;
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleEasterEggClick = () => {
+    setIsEasterEggOpen(!isEasterEggOpen);
+  };
+
+  const handleEasterEggDifficultyChange = (newDifficulty: Difficulty) => {
+    if (onDifficultyChange) {
+      onDifficultyChange(newDifficulty);
+    }
+    setIsEasterEggOpen(false);
+  };
+
+  // Handle click outside to close easter egg
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isEasterEggOpen && 
+        easterEggDesktopRef.current && 
+        easterEggMobileRef.current &&
+        !easterEggDesktopRef.current.contains(event.target as Node) &&
+        !easterEggMobileRef.current.contains(event.target as Node)
+      ) {
+        setIsEasterEggOpen(false);
+      }
+    };
+
+    if (isEasterEggOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEasterEggOpen]);
+
+  // Easter egg difficulty options
+  const easterEggOptions = [
+    {
+      value: "zbra-easy" as Difficulty,
+      name: "ZBRA Easy",
+      icon: "/icons/ZBRAEasy.svg",
+      description: "Good for beginner Zbra's so they can finally reach 500 pts maybe.",
+      iconProps: {
+        width: 24,
+        height: 14.744,
+        mdWidth: 40,
+        mdHeight: 24.57,
+        className: "mr-[10px]"
+      }
+    },
+    {
+      value: "zbra-hard" as Difficulty,
+      name: "ZBRA Hard",
+      icon: "/icons/ZBRAHard.svg",
+      description: "Very difficult, only for the trained zbra's, not just any zbra.",
+      iconProps: {
+        width: 24,
+        height: 15.78,
+        mdWidth: 40,
+        mdHeight: 26.3,
+        className: "mr-[10px]"
+      }
+    }
+  ];
+
   return (
     <div className="flex justify-between w-full items-center relative">
-      <div className="flex-col hidden lg:flex">
-        <div className="font-extrabold text-collection-1-light-gray text-[39px] tracking-[1.95px] leading-[normal] text-start">
+      <div className="flex-col hidden lg:flex relative" ref={easterEggDesktopRef}>
+        <button 
+          onContextMenu={(e) => {
+            e.preventDefault();
+            handleEasterEggClick();
+          }}
+          className="font-extrabold text-collection-1-light-gray text-[39px] tracking-[1.95px] leading-[normal] text-start hover:opacity-80 transition-opacity cursor-pointer"
+        >
           LLMC
-        </div>
+        </button>
         <div className="font-semibold text-[#72e6cf] text-[18px] tracking-[0] leading-[normal] text-start">
           alpha
         </div>
+        
+        {/* Easter egg mode selector */}
+        {isEasterEggOpen && (
+          <div className="absolute top-full left-0 mt-2 z-50 bg-[#f4f5f6] dark:bg-[#25292D] w-[280px] rounded-[10px] lg:rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
+            {easterEggOptions.map((option, index) => (
+              <button 
+                key={option.value}
+                type="button" 
+                onClick={() => handleEasterEggDifficultyChange(option.value)} 
+                className={`px-[10px] py-[15px] justify-center items-start flex flex-col rounded-xl relative w-full ${
+                  index === 0 ? "mt-[12px]" : ""
+                } ${
+                  index === easterEggOptions.length - 1 ? "mb-[12px]" : ""
+                } ${
+                  index > 0 && index < easterEggOptions.length - 1 ? "my-[9px]" : ""
+                } ${
+                  selectedDifficulty === option.value ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
+                }`}
+              >
+                <div className="text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center">
+                  <Image 
+                    src={option.icon} 
+                    width={option.iconProps.mdWidth} 
+                    height={option.iconProps.mdHeight} 
+                    alt={`${option.name} Icon`} 
+                    className={option.iconProps.className || "mr-[10px]"} 
+                  />
+                  {option.name}
+                </div>
+                {option.description && (
+                  <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>
+                    {option.description}
+                  </p>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="flex-col lg:hidden">
-        <svg
-          width="53"
-          height="26"
-          viewBox="0 0 53 26"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+      <div className="flex-col lg:hidden relative" ref={easterEggMobileRef}>
+        <button 
+          onContextMenu={(e) => {
+            e.preventDefault();
+            handleEasterEggClick();
+          }}
+          className="hover:opacity-80 transition-opacity"
         >
-          <path
-            d="M46.3248 13.7807C42.3712 13.7807 39.4014 10.8676 39.4014 7.02757C39.4014 3.18754 42.3712 0.274414 46.3248 0.274414C49.7486 0.274414 52.4537 2.48763 53.0023 5.57101H49.5406C49.1055 4.28469 47.8381 3.41454 46.3248 3.41454C44.2818 3.41454 42.7307 4.96568 42.7307 7.02757C42.7307 9.08946 44.2818 10.6406 46.3248 10.6406C47.8381 10.6406 49.1055 9.77045 49.5406 8.48413H53.0023C52.4537 11.5675 49.7486 13.7807 46.3248 13.7807Z"
-            fill="currentColor"
-          />
-          <path
-            d="M21.9736 13.5538V0.501465H26.0028L29.3699 6.91413L32.756 0.501465H36.7284V13.5538H33.4748V5.3819L30.2779 11.4919H28.4241L25.2273 5.3819V13.5538H21.9736Z"
-            fill="currentColor"
-          />
-          <path
-            d="M11.2363 13.5538V0.501465H14.49V10.4893H19.5028V13.5538H11.2363Z"
-            fill="currentColor"
-          />
-          <path
-            d="M0.5 13.5538V0.501465H3.75362V10.4893H8.76647V13.5538H0.5Z"
-            fill="currentColor"
-          />
-          <path
-            d="M21.4562 24.1717C20.2164 24.1717 19.2822 23.1677 19.2822 21.8406C19.2822 20.5135 20.2164 19.5095 21.4562 19.5095C22.0498 19.5095 22.5475 19.7452 22.9054 20.1381V19.6143H24.0404V24.0669H22.9054V23.5431C22.5475 23.936 22.0498 24.1717 21.4562 24.1717ZM21.6744 23.0716C22.3816 23.0716 22.9054 22.5391 22.9054 21.8406C22.9054 21.1422 22.3816 20.6096 21.6744 20.6096C20.976 20.6096 20.4521 21.1422 20.4521 21.8406C20.4521 22.5391 20.976 23.0716 21.6744 23.0716Z"
-            fill="#5CE2C7"
-          />
-          <path
-            d="M14.1904 24.0668V17.7808H15.3254V20.138C15.6746 19.7277 16.1636 19.5094 16.7398 19.5094C17.7875 19.5094 18.4772 20.1904 18.4772 21.2381V24.0668H17.3422V21.6048C17.3422 21.0024 16.958 20.6095 16.3731 20.6095C15.7445 20.6095 15.3254 21.0111 15.3254 21.6222V24.0668H14.1904Z"
-            fill="#5CE2C7"
-          />
-          <path
-            d="M8.58887 25.7257V19.6143H9.72385V20.1381C10.0818 19.7452 10.5795 19.5095 11.1731 19.5095C12.4129 19.5095 13.3383 20.5135 13.3383 21.8406C13.3383 23.1677 12.4129 24.1717 11.1731 24.1717C10.5795 24.1717 10.0818 23.936 9.72385 23.5431V25.7257H8.58887ZM10.9461 23.0716C11.6533 23.0716 12.1684 22.5391 12.1684 21.8406C12.1684 21.1422 11.6533 20.6096 10.9461 20.6096C10.2477 20.6096 9.72385 21.1422 9.72385 21.8406C9.72385 22.5391 10.2477 23.0716 10.9461 23.0716Z"
-            fill="#5CE2C7"
-          />
-          <path
-            d="M6.35449 24.0668V17.7808H7.48948V24.0668H6.35449Z"
-            fill="#5CE2C7"
-          />
-          <path
-            d="M2.67393 24.1717C1.43418 24.1717 0.5 23.1677 0.5 21.8406C0.5 20.5135 1.43418 19.5095 2.67393 19.5095C3.26762 19.5095 3.76526 19.7452 4.12322 20.1381V19.6143H5.2582V24.0669H4.12322V23.5431C3.76526 23.936 3.26762 24.1717 2.67393 24.1717ZM2.8922 23.0716C3.59938 23.0716 4.12322 22.5391 4.12322 21.8406C4.12322 21.1422 3.59938 20.6096 2.8922 20.6096C2.19375 20.6096 1.66991 21.1422 1.66991 21.8406C1.66991 22.5391 2.19375 23.0716 2.8922 23.0716Z"
-            fill="#5CE2C7"
-          />
-        </svg>
+          <svg
+            width="53"
+            height="26"
+            viewBox="0 0 53 26"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M46.3248 13.7807C42.3712 13.7807 39.4014 10.8676 39.4014 7.02757C39.4014 3.18754 42.3712 0.274414 46.3248 0.274414C49.7486 0.274414 52.4537 2.48763 53.0023 5.57101H49.5406C49.1055 4.28469 47.8381 3.41454 46.3248 3.41454C44.2818 3.41454 42.7307 4.96568 42.7307 7.02757C42.7307 9.08946 44.2818 10.6406 46.3248 10.6406C47.8381 10.6406 49.1055 9.77045 49.5406 8.48413H53.0023C52.4537 11.5675 49.7486 13.7807 46.3248 13.7807Z"
+              fill="currentColor"
+            />
+            <path
+              d="M21.9736 13.5538V0.501465H26.0028L29.3699 6.91413L32.756 0.501465H36.7284V13.5538H33.4748V5.3819L30.2779 11.4919H28.4241L25.2273 5.3819V13.5538H21.9736Z"
+              fill="currentColor"
+            />
+            <path
+              d="M11.2363 13.5538V0.501465H14.49V10.4893H19.5028V13.5538H11.2363Z"
+              fill="currentColor"
+            />
+            <path
+              d="M0.5 13.5538V0.501465H3.75362V10.4893H8.76647V13.5538H0.5Z"
+              fill="currentColor"
+            />
+            <path
+              d="M21.4562 24.1717C20.2164 24.1717 19.2822 23.1677 19.2822 21.8406C19.2822 20.5135 20.2164 19.5095 21.4562 19.5095C22.0498 19.5095 22.5475 19.7452 22.9054 20.1381V19.6143H24.0404V24.0669H22.9054V23.5431C22.5475 23.936 22.0498 24.1717 21.4562 24.1717ZM21.6744 23.0716C22.3816 23.0716 22.9054 22.5391 22.9054 21.8406C22.9054 21.1422 22.3816 20.6096 21.6744 20.6096C20.976 20.6096 20.4521 21.1422 20.4521 21.8406C20.4521 22.5391 20.976 23.0716 21.6744 23.0716Z"
+              fill="#5CE2C7"
+            />
+            <path
+              d="M14.1904 24.0668V17.7808H15.3254V20.138C15.6746 19.7277 16.1636 19.5094 16.7398 19.5094C17.7875 19.5094 18.4772 20.1904 18.4772 21.2381V24.0668H17.3422V21.6048C17.3422 21.0024 16.958 20.6095 16.3731 20.6095C15.7445 20.6095 15.3254 21.0111 15.3254 21.6222V24.0668H14.1904Z"
+              fill="#5CE2C7"
+            />
+            <path
+              d="M8.58887 25.7257V19.6143H9.72385V20.1381C10.0818 19.7452 10.5795 19.5095 11.1731 19.5095C12.4129 19.5095 13.3383 20.5135 13.3383 21.8406C13.3383 23.1677 12.4129 24.1717 11.1731 24.1717C10.5795 24.1717 10.0818 23.936 9.72385 23.5431V25.7257H8.58887ZM10.9461 23.0716C11.6533 23.0716 12.1684 22.5391 12.1684 21.8406C12.1684 21.1422 11.6533 20.6096 10.9461 20.6096C10.2477 20.6096 9.72385 21.1422 9.72385 21.8406C9.72385 22.5391 10.2477 23.0716 10.9461 23.0716Z"
+              fill="#5CE2C7"
+            />
+            <path
+              d="M6.35449 24.0668V17.7808H7.48948V24.0668H6.35449Z"
+              fill="#5CE2C7"
+            />
+            <path
+              d="M2.67393 24.1717C1.43418 24.1717 0.5 23.1677 0.5 21.8406C0.5 20.5135 1.43418 19.5095 2.67393 19.5095C3.26762 19.5095 3.76526 19.7452 4.12322 20.1381V19.6143H5.2582V24.0669H4.12322V23.5431C3.76526 23.936 3.26762 24.1717 2.67393 24.1717ZM2.8922 23.0716C3.59938 23.0716 4.12322 22.5391 4.12322 21.8406C4.12322 21.1422 3.59938 20.6096 2.8922 20.6096C2.19375 20.6096 1.66991 21.1422 1.66991 21.8406C1.66991 22.5391 2.19375 23.0716 2.8922 23.0716Z"
+              fill="#5CE2C7"
+            />
+          </svg>
+        </button>
+        
+        {/* Mobile Easter egg mode selector */}
+        {isEasterEggOpen && (
+          <div className="absolute top-full left-0 mt-2 z-50 bg-[#f4f5f6] dark:bg-[#25292D] w-[280px] rounded-[10px] lg:rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
+            {easterEggOptions.map((option, index) => (
+              <button 
+                key={option.value}
+                type="button" 
+                onClick={() => handleEasterEggDifficultyChange(option.value)} 
+                className={`px-[10px] py-[15px] justify-center items-start flex flex-col rounded-xl relative w-full ${
+                  index === 0 ? "mt-[12px]" : ""
+                } ${
+                  index === easterEggOptions.length - 1 ? "mb-[12px]" : ""
+                } ${
+                  index > 0 && index < easterEggOptions.length - 1 ? "my-[9px]" : ""
+                } ${
+                  selectedDifficulty === option.value ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
+                }`}
+              >
+                <div className="text-[14px] font-bold tracking-wider flex flex-row items-center">
+                  <Image 
+                    src={option.icon} 
+                    width={option.iconProps.width} 
+                    height={option.iconProps.height} 
+                    alt={`${option.name} Icon`} 
+                    className={option.iconProps.className || "mr-[10px]"} 
+                  />
+                  {option.name}
+                </div>
+                {option.description && (
+                  <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>
+                    {option.description}
+                  </p>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Desktop navigation */}

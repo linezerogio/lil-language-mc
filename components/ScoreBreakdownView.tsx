@@ -66,7 +66,7 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
                     ).map((modifier) => (
                         <div key={modifier.text} className='flex items-center'>
                             {modifier.positive ? <Image src="/icons/Positive.svg" width={16} height={16} alt="Positive Icon" /> : <Image src="/icons/Negative.svg" width={16} height={16} alt="Negative Icon" />}
-                            <p className={`text-[16px] font-medium text-[#B2B2B2] pl-[10px]`}>{modifier.text}</p>
+                            <p className={`text-[16px] font-medium text-[#B2B2B2] pl-[10px] whitespace-nowrap`}>{modifier.text}</p>
                             {modifier.number > 1 && <p className={`text-[12px] font-extrabold ${modifier.positive ? "text-[#5CE2C7]" : "text-[#FF273A]"} ml-1`}>({modifier.number})</p>}
                         </div>
                     ))}
@@ -116,7 +116,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown,
     ];
 
     return (
-        <div className='bg-white dark:bg-[#1B1C1D] flex flex-1 rounded-[25px] ml-[45px] my-[43px] overflow-x-auto'>
+        <div className='bg-white dark:bg-[#1B1C1D] flex flex-1 rounded-[25px] ml-[45px] my-[43px] overflow-x-auto min-w-0'>
             {showInfo && !isMobile && <div className='absolute top-0 left-0 w-full h-full bg-[#000000bb] z-20'>
                 <div className='relative bg-white dark:bg-[#1B1C1D] flex w-[1058px] h-[199px] top-[calc(50vh-99.5px)] left-[calc(50vw-529px)] bottom-0 rounded-[25px]'>
                 <button className='absolute top-[25px] right-[25px] w-[15px] h-[15px] z-30' onClick={() => setShowInfo(!showInfo)}>

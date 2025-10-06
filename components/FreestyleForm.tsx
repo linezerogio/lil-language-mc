@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useEffect, KeyboardEvent, useRef, use } from 'react';
+import { useState, useEffect, KeyboardEvent, useRef, use, useMemo } from 'react';
 import { redirect, useRouter } from 'next/navigation';
 import { arraysEqual, getLastWord, getTimePercentageClass } from '@/util';
 import { getRhymeData } from '@/util/rhymes';
@@ -17,6 +17,7 @@ import useIsMobile from '../hooks/useIsMobile';
 import DifficultyBottomSheet from './BottomSheets/DifficultyBottomSheet';
 import ModeBottomSheet from './BottomSheets/ModeBottomSheet';
 import ScoreDetailsBottomSheet from './BottomSheets/ScoreDetailsBottomSheet';
+import ModeSelector from './ModeSelector';
 
 const calculateColor = (percentage: number) => {
     return (percentage > 75 ? "bg-[#5DE3C8]" : (percentage > 50 ? "bg-[#5DE36A]" : (percentage > 25 ? "bg-[#E0E35D]" : (percentage > 10 ? "bg-[#FF7B01]" : "bg-[#FF0101]"))));
@@ -127,6 +128,23 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         setNewDifficulty(selectedDifficulty);
     }
 
+    // Handle easter egg difficulty change from Header
+    const handleEasterEggDifficultyChange = (newDifficulty: Difficulty) => {
+        setNewDifficulty(newDifficulty);
+    };
+
+    // Map ZBRA difficulties to base difficulties for routing
+    const getRouteDifficulty = (difficulty: Difficulty): string => {
+        switch (difficulty) {
+            case 'zbra-easy':
+                return 'zbra-easy';
+            case 'zbra-hard':
+                return 'zbra-hard';
+            default:
+                return difficulty;
+        }
+    };
+
     const [newGameMode, setNewGameMode] = useState<"4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode">("4-Bar Mode");
     const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
     const [gameModeBottomSheetOpen, setGameModeBottomSheetOpen] = useState<boolean>(false);
@@ -146,67 +164,146 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         setNewGameMode(selectedMode);
     }
 
-    // Helper to get icon size for difficulty (24px width on mobile, original on md+)
-    const getDifficultyIconProps = (icon: "easy" | "medium" | "hard") => {
-        switch (icon) {
-            case "easy":
-                return {
-                    className: "mr-[10px]",
+    // Difficulty options configuration - dynamically include ZBRA modes only if selected
+    const difficultyOptions = useMemo(() => {
+        const baseOptions = [
+            {
+                value: "easy" as Difficulty,
+                name: "Easy",
+                icon: "/Easy.svg",
+                description: "Good for beginners or for maximizing rhymes.",
+                iconProps: {
                     width: 24,
                     height: 14.744,
                     mdWidth: 40,
                     mdHeight: 24.57,
-                };
-            case "medium":
-                return {
-                    className: "mr-[10px]",
+                    className: "mr-[10px]"
+                }
+            },
+            {
+                value: "medium" as Difficulty,
+                name: "Medium", 
+                icon: "/Medium.svg",
+                description: "Little bit of a challenge to push your limit.",
+                iconProps: {
                     width: 24,
                     height: 14.406,
                     mdWidth: 40,
                     mdHeight: 24.01,
-                };
-            case "hard":
-                return {
-                    className: "mr-[10px]",
+                    className: "mr-[10px]"
+                }
+            },
+            {
+                value: "hard" as Difficulty,
+                name: "Hard",
+                icon: "/Hard.svg", 
+                description: "Some of the most difficult words to rhyme with.",
+                iconProps: {
                     width: 24,
                     height: 15.78,
                     mdWidth: 40,
                     mdHeight: 26.3,
-                };
-            default:
-                return {};
+                    className: "mr-[10px]"
+                }
+            }
+        ];
+
+        // Add ZBRA modes only if currently selected
+        if (newDifficulty === "zbra-easy") {
+            baseOptions.push({
+                value: "zbra-easy" as Difficulty,
+                name: "ZBRA Easy",
+                icon: "/icons/ZBRAEasy.svg",
+                description: "Good for beginner Zbra's so they can finally reach 500 pts maybe.",
+                iconProps: {
+                    width: 24,
+                    height: 14.744,
+                    mdWidth: 40,
+                    mdHeight: 24.57,
+                    className: "mr-[10px]"
+                }
+            });
         }
+
+        if (newDifficulty === "zbra-hard") {
+            baseOptions.push({
+                value: "zbra-hard" as Difficulty,
+                name: "ZBRA Hard",
+                icon: "/icons/ZBRAHard.svg",
+                description: "Very difficult, only for the trained zbra's, not just any zbra.",
+                iconProps: {
+                    width: 24,
+                    height: 15.78,
+                    mdWidth: 40,
+                    mdHeight: 26.3,
+                    className: "mr-[10px]"
+                }
+            });
+        }
+
+        return baseOptions;
+    }, [newDifficulty]);
+
+    // Game mode options configuration
+    const gameModeOptions = [
+        {
+            value: "4-Bar Mode",
+            name: "4-Bar Mode",
+            icon: "/icons/FourBarMode.svg",
+            description: "Write 4 sentences that rhyme with the keyword within the time limit.",
+            iconProps: {
+                width: 16,
+                height: 16,
+                mdWidth: 23,
+                mdHeight: 24,
+                className: "mr-[10px]"
+            }
+        },
+        {
+            value: "Rapid Fire Mode",
+            name: "Rapid Fire Mode",
+            icon: "/icons/RapidFireMode.svg",
+            description: "Write 2 sentences that rhyme with each keyword. Complete as many keywords as you can within the time limit.",
+            disabled: true,
+            iconProps: {
+                width: 16,
+                height: 16,
+                mdWidth: 21.6,
+                mdHeight: 27,
+                className: "mr-[10px]"
+            }
+        },
+        {
+            value: "Endless Mode",
+            name: "Endless Mode",
+            icon: "/icons/EndlessMode.svg",
+            description: "Write as many sentences as possible that rhyme until you run out of lives.",
+            disabled: true,
+            iconProps: {
+                width: 16,
+                height: 16,
+                mdWidth: 25.15,
+                mdHeight: 12.15,
+                className: "mr-[10px]"
+            }
+        }
+    ];
+
+    // Wrapper functions for type safety
+    const handleDifficultySelectWrapper = (mode: string) => {
+        handleDifficultySelect(mode as Difficulty);
     };
 
-    const getGameModeIconProps = (icon: "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode") => {
-        switch (icon) {
-            case "4-Bar Mode":
-                return {
-                    className: "mr-[10px]",
-                    width: 16,
-                    height: 16,
-                    mdWidth: 23,
-                    mdHeight: 24,
-                };
-            case "Rapid Fire Mode":
-                return {
-                    className: "mr-[10px]", 
-                    width: 16,
-                    height: 16,
-                    mdWidth: 21.6,
-                    mdHeight: 27,
-                };
-            case "Endless Mode":
-                return {
-                    className: "mr-[10px]",
-                    width: 16,
-                    height: 16,
-                    mdWidth: 25.15,
-                    mdHeight: 12.15,
-                };
-            default:
-                return {};
-        }
+    const handleDifficultyButtonWrapper = (mode: string) => {
+        handleDifficultyButton(mode as Difficulty);
+    };
+
+    const handleGameModeSelectWrapper = (mode: string) => {
+        handleGameModeSelect(mode as "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode");
+    };
+
+    const handleGameModeButtonWrapper = (mode: string) => {
+        handleGameModeButton(mode as "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode");
     };
 
     const reset = () => {
@@ -217,7 +314,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         setTimePercentageLeft(100);
         setLines(['']);
         setScore(0);
-        router.replace('/freestyle/' + newDifficulty);
+        router.replace('/freestyle/' + getRouteDifficulty(newDifficulty));
     };
 
     useEffect(() => {
@@ -443,7 +540,10 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     } else if (pageState === "score") {
         return (
             <div className="max-w-[2560px] w-full h-full px-[30px] lg:px-[100px] pt-[30px] lg:pt-[50px] mx-auto text-center flex flex-col">
-                <Header />
+                <Header 
+                    difficulty={newDifficulty} 
+                    onDifficultyChange={handleEasterEggDifficultyChange}
+                />
                 <div className='flex flex-col lg:flex-row items-center mt-5'>
                     <ScoreGauge
                         score={score}
@@ -457,7 +557,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     <div className="lg:hidden text-[14px] text-[#565757] dark:text-[#B2B2B2] -translate-y-[20px]">
                         4-Bar Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)} &quot;{word.charAt(0).toUpperCase() + word.slice(1)}&quot;
                     </div>
-                    <div className="hidden lg:block">
+                    <div className="hidden lg:flex flex-1 min-w-0">
                         <ScoreBreakdownView 
                             scoreBreakdown={scoreBreakdown} 
                             lines={lines.filter(line => line.trim() !== '')}
@@ -488,176 +588,23 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 </div>
 
                 <div className='flex lg:mt-[30px] justify-center h-[43px] lg:h-[73px] w-full lg:w-auto gap-2.5 mb-[15px] lg:mb-0'>
-                    <div
-                        className={cn(
-                            "bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative lg:w-[311px] justify-center rounded-[10px] lg:rounded-[25px] flex-1 lg:flex-none py-3 lg:py-0",
-                            difficultyMenuOpen ? "z-50" : "z-10"
-                        )}
-                    >
-                        {newDifficulty === "easy" && (!difficultyMenuOpen || isMobile) && <button type="button" onClick={() => handleDifficultyButton("easy")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/Easy.svg" width={getDifficultyIconProps("easy").width} height={getDifficultyIconProps("easy").height} alt={"Easy Icon"} className={getDifficultyIconProps("easy").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/Easy.svg" width={getDifficultyIconProps("easy").mdWidth} height={getDifficultyIconProps("easy").mdHeight} alt={"Easy Icon"} className={getDifficultyIconProps("easy").className} />
-                                </span>
-                                Easy
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {newDifficulty === "medium" && (!difficultyMenuOpen || isMobile) && <button type="button" onClick={() => handleDifficultyButton("medium")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/Medium.svg" width={getDifficultyIconProps("medium").width} height={getDifficultyIconProps("medium").height} alt={"Medium Icon"} className={getDifficultyIconProps("medium").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/Medium.svg" width={getDifficultyIconProps("medium").mdWidth} height={getDifficultyIconProps("medium").mdHeight} alt={"Medium Icon"} className={getDifficultyIconProps("medium").className} />
-                                </span>
-                                Medium
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {newDifficulty === "hard" && (!difficultyMenuOpen || isMobile) && <button type="button" onClick={() => handleDifficultyButton("hard")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/Hard.svg" width={getDifficultyIconProps("hard").width} height={getDifficultyIconProps("hard").height} alt={"Hard Icon"} className={getDifficultyIconProps("hard").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/Hard.svg" width={getDifficultyIconProps("hard").mdWidth} height={getDifficultyIconProps("hard").mdHeight} alt={"Hard Icon"} className={getDifficultyIconProps("hard").className} />
-                                </span>
-                                Hard
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {difficultyMenuOpen && !isMobile && <div className="flex flex-col absolute bottom-0 left-0 lg:left-auto bg-[#f4f5f6] dark:bg-[#25292D] w-[311px] rounded-[10px] lg:rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
-                            <button type="button" onClick={() => handleDifficultyButton("easy")} className={"px-[10px] py-[15px] mt-[12px] justify-center items-start flex flex-col rounded-xl " + (newDifficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/Easy.svg" width={getDifficultyIconProps("easy").width} height={getDifficultyIconProps("easy").height} alt={"Easy Icon"} className={getDifficultyIconProps("easy").className} />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/Easy.svg" width={getDifficultyIconProps("easy").mdWidth} height={getDifficultyIconProps("easy").mdHeight} alt={"Easy Icon"} className={getDifficultyIconProps("easy").className} />
-                                    </span>
-                                    Easy
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Good for beginners or for maximizing rhymes.</p>
-                            </button>
-                            <button type="button" onClick={() => handleDifficultyButton("medium")} className={"px-[10px] py-[15px] my-[9px] justify-center items-start flex flex-col rounded-xl " + (newDifficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/Medium.svg" width={getDifficultyIconProps("medium").width} height={getDifficultyIconProps("medium").height} alt={"Medium Icon"} className={getDifficultyIconProps("medium").className} />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/Medium.svg" width={getDifficultyIconProps("medium").mdWidth} height={getDifficultyIconProps("medium").mdHeight} alt={"Medium Icon"} className={getDifficultyIconProps("medium").className} />
-                                    </span>
-                                    Medium
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Little bit of a challenge to push your limit.</p>
-                            </button>
-                            <button type="button" onClick={() => handleDifficultyButton("hard")} className={"px-[10px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl " + (newDifficulty === "hard" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/Hard.svg" width={getDifficultyIconProps("hard").width} height={getDifficultyIconProps("hard").height} alt={"Hard Icon"} className={getDifficultyIconProps("hard").className} />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/Hard.svg" width={getDifficultyIconProps("hard").mdWidth} height={getDifficultyIconProps("hard").mdHeight} alt={"Hard Icon"} className={getDifficultyIconProps("hard").className} />
-                                    </span>
-                                    Hard
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Some of the most difficult words to rhyme with.</p>
-                            </button>
-                        </div>}
-                    </div>
+                    <ModeSelector
+                        options={difficultyOptions}
+                        selectedMode={newDifficulty}
+                        onModeSelect={handleDifficultySelectWrapper}
+                        onButtonClick={handleDifficultyButtonWrapper}
+                        onClose={() => setDifficultyMenuOpen(false)}
+                        isMenuOpen={difficultyMenuOpen}
+                    />
                     <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black dark:text-white text-[18px] lg:text-[25px] font-bold font-[termina] hidden lg:block w-full lg:w-[286px]" onClick={() => reset()}>PLAY AGAIN</button>
-                    <div
-                        className={cn(
-                            "bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative lg:w-[311px] justify-center rounded-[10px] lg:rounded-[25px] flex-1 lg:flex-none py-3 lg:py-0",
-                            gameModeMenuOpen ? "z-50" : "z-10"
-                        )}
-                    >
-                        {newGameMode === "4-Bar Mode" && (!gameModeMenuOpen || isMobile) && <button type="button" onClick={() => handleGameModeButton("4-Bar Mode")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px] lg:px-[25px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/icons/FourBarMode.svg" height={getGameModeIconProps("4-Bar Mode").height} width={getGameModeIconProps("4-Bar Mode").width} alt={"4-Bar Mode Icon"} className={getGameModeIconProps("4-Bar Mode").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/icons/FourBarMode.svg" height={getGameModeIconProps("4-Bar Mode").mdHeight} width={getGameModeIconProps("4-Bar Mode").mdWidth} alt={"4-Bar Mode Icon"} className={getGameModeIconProps("4-Bar Mode").className} />
-                                </span>
-                                4-Bar <span className="hidden lg:block">&nbsp;Mode</span>
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {newGameMode === "Rapid Fire Mode" && (!gameModeMenuOpen || isMobile) && <button type="button" onClick={() => handleGameModeButton("Rapid Fire Mode")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[5px] lg:px-[25px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/icons/RapidFireMode.svg" height={getGameModeIconProps("Rapid Fire Mode").height} width={getGameModeIconProps("Rapid Fire Mode").width} alt={"Rapid Fire Mode Icon"} className={getGameModeIconProps("Rapid Fire Mode").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/icons/RapidFireMode.svg" height={getGameModeIconProps("Rapid Fire Mode").mdHeight} width={getGameModeIconProps("Rapid Fire Mode").mdWidth} alt={"Rapid Fire Mode Icon"} className={getGameModeIconProps("Rapid Fire Mode").className} />
-                                </span>
-                                Rapid Fire <span className="hidden lg:block">&nbsp;Mode</span>
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {newGameMode === "Endless Mode" && (!gameModeMenuOpen || isMobile) && <button type="button" onClick={() => handleGameModeButton("Endless Mode")} className={"justify-between items-center gap-2.5 flex flex-row flex-1 px-[5px] lg:px-[25px]"}>
-                            <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto"}>
-                                <span className="block lg:hidden">
-                                    <Image src="/icons/EndlessMode.svg" height={getGameModeIconProps("Endless Mode").height} width={getGameModeIconProps("Endless Mode").width} alt={"Endless Mode Icon"} className={getGameModeIconProps("Endless Mode").className} />
-                                </span>
-                                <span className="hidden lg:block">
-                                    <Image src="/icons/EndlessMode.svg" height={getGameModeIconProps("Endless Mode").mdHeight} width={getGameModeIconProps("Endless Mode").mdWidth} alt={"Endless Mode Icon"} className={getGameModeIconProps("Endless Mode").className} />
-                                </span>
-                                Endless <span className="hidden lg:block">&nbsp;Mode</span>
-                            </div>
-                            <div><Image src="/icons/ExpandDark.svg" height={20} width={18} alt={"Expand Arrow"} className='dark:hidden ml-[4px] px-[3px] py-[2px]' /><Image src="/icons/Expand.svg" height={20} width={18} alt={"Expand Arrow"} className='hidden dark:block ml-[4px] px-[3px] py-[2px]' /></div>
-                        </button>}
-                        {gameModeMenuOpen && !isMobile && <div className="flex flex-col absolute bottom-0 bg-[#f4f5f6] dark:bg-[#25292D] w-[311px] rounded-[10px] lg:rounded-[25px] px-3 shadow-[0_4px_40.6px_rgba(0,0,0,0.25)]">
-                            <button type="button" onClick={() => handleGameModeButton("4-Bar Mode")} className={"px-[10px] py-[15px] mt-[12px] justify-center items-start flex flex-col rounded-xl " + (newGameMode === "4-Bar Mode" ? "bg-[#fff] dark:bg-[#1C1E1E]" : "")}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/icons/FourBarMode.svg" height={getGameModeIconProps("4-Bar Mode").height} width={getGameModeIconProps("4-Bar Mode").width} alt={"4-Bar Mode Icon"} className={getGameModeIconProps("4-Bar Mode").className} />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/icons/FourBarMode.svg" height={getGameModeIconProps("4-Bar Mode").mdHeight} width={getGameModeIconProps("4-Bar Mode").mdWidth} alt={"4-Bar Mode Icon"} className={getGameModeIconProps("4-Bar Mode").className} />
-                                    </span>
-                                    4-Bar <span className="hidden lg:block">&nbsp;Mode</span>
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write 4 sentences that rhyme with the keyword within the time limit.</p>
-                            </button>
-                            <button type="button" onClick={() => { }} className={"px-[10px] py-[15px] my-[9px] justify-center items-start flex flex-col rounded-xl relative cursor-default"}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/icons/RapidFireMode.svg" height={24} width={23} alt={"Rapid Fire Mode Icon"} className='mr-[10px]' />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/icons/RapidFireMode.svg" height={24} width={23} alt={"Rapid Fire Mode Icon"} className='mr-[10px]' />
-                                    </span>
-                                    Rapid Fire <span className="hidden lg:block">&nbsp;Mode</span>
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write 2 sentences that rhyme with each keyword. Complete as many keywords as you can within the time limit.</p>
-                                <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
-                                    <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
-                                    <p className="text-[12px] text-white font-bold">Coming Soon</p>
-                                </div>
-                            </button>
-                            <button type="button" onClick={() => { }} className={"px-[10px] py-[15px] mb-[12px] justify-center items-start flex flex-col rounded-xl relative cursor-default"}>
-                                <div className={"text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row items-center"}>
-                                    <span className="block lg:hidden">
-                                        <Image src="/icons/EndlessMode.svg" height={12.15} width={25.15} alt={"Endless Mode Icon"} className='mr-[10px]' />
-                                    </span>
-                                    <span className="hidden lg:block">
-                                        <Image src="/icons/EndlessMode.svg" height={12.15} width={25.15} alt={"Endless Mode Icon"} className='mr-[10px]' />
-                                    </span>
-                                    Endless <span className="hidden lg:block">&nbsp;Mode</span>
-                                </div>
-                                <p className='text-[12px] text-[#B2B2B2] text-left pl-2'>Write as many sentences as possible that rhyme until you run out of lives.</p>
-                                <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
-                                    <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt={"Lock Icon"} />
-                                    <p className="text-[12px] text-white font-bold">Coming Soon</p>
-                                </div>
-                            </button></div>}
-                    </div>
+                    <ModeSelector
+                        options={gameModeOptions}
+                        selectedMode={newGameMode}
+                        onModeSelect={handleGameModeSelectWrapper}
+                        onButtonClick={handleGameModeButtonWrapper}
+                        onClose={() => setGameModeMenuOpen(false)}
+                        isMenuOpen={gameModeMenuOpen}
+                    />
                 </div>
                 <button className="bg-[#5CE2C7] py-[10px] px-[20px] mb-[30px] rounded-[12px] text-black dark:text-white text-[18px] lg:text-[25px] font-bold font-[termina] block lg:hidden w-full" onClick={() => reset()}>PLAY AGAIN</button>
 

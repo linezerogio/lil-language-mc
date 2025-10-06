@@ -1,8 +1,7 @@
 import React from 'react';
 import { Sheet } from 'react-modal-sheet';
 import Image from 'next/image';
-
-type Difficulty = "easy" | "medium" | "hard";
+import { Difficulty } from '@/types/difficulty';
 
 interface DifficultyBottomSheetProps {
   isOpen: boolean;
@@ -20,6 +19,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
   const getDifficultyIconProps = (icon: Difficulty) => {
     switch (icon) {
       case "easy":
+      case "zbra-easy":
         return {
           className: "mr-[10px]",
           width: 24,
@@ -32,6 +32,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
           height: 14.406,
         };
       case "hard":
+      case "zbra-hard":
         return {
           className: "mr-[10px]",
           width: 24,
@@ -56,8 +57,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
 
             <button
               onClick={() => handleDifficultySelect("easy")}
-              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
-                }`}
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
                 <Image
@@ -76,8 +76,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
 
             <button
               onClick={() => handleDifficultySelect("medium")}
-              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
-                }`}
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "medium" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
                 <Image
@@ -96,8 +95,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
 
             <button
               onClick={() => handleDifficultySelect("hard")}
-              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "hard" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
-                }`}
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "hard" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
                 <Image
@@ -113,6 +111,48 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
                 Some of the most difficult words to rhyme with.
               </p>
             </button>
+
+            {difficulty === 'zbra-easy' && (
+              <button
+                onClick={() => handleDifficultySelect("zbra-easy")}
+                className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "zbra-easy" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
+              >
+                <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
+                  <Image
+                    src="/icons/ZBRAEasy.svg"
+                    width={getDifficultyIconProps("zbra-easy").width}
+                    height={getDifficultyIconProps("zbra-easy").height}
+                    alt="ZBRA Easy Icon"
+                    className={getDifficultyIconProps("zbra-easy").className}
+                  />
+                  ZBRA Easy
+                </div>
+                <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
+                  Good for beginner Zbra's so they can finally reach 500 pts maybe.
+                </p>
+              </button>
+            )}
+
+            {difficulty === 'zbra-hard' && (
+              <button
+                onClick={() => handleDifficultySelect("zbra-hard")}
+                className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "zbra-hard" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
+              >
+                <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
+                  <Image
+                    src="/icons/ZBRAHard.svg"
+                    width={getDifficultyIconProps("zbra-hard").width}
+                    height={getDifficultyIconProps("zbra-hard").height}
+                    alt="ZBRA Hard Icon"
+                    className={getDifficultyIconProps("zbra-hard").className}
+                  />
+                  ZBRA Hard
+                </div>
+                <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
+                  Very difficult, only for the trained zbra's, not just any zbra.
+                </p>
+              </button>
+            )}
           </div>
         </Sheet.Content>
       </Sheet.Container>

@@ -133,26 +133,45 @@ function thirdFromDifficulty(difficulty: "easy" | "medium" | "hard") {
     }
 }
 
-export async function getWordByDifficulty(difficulty: "easy" | "medium" | "hard") {
+export async function getWordByDifficulty(difficulty: "easy" | "medium" | "hard" | "zbra-easy" | "zbra-hard") {
     if (process.env.DATABASE_URL === undefined) {
         return;
     }
 
-
+    if (difficulty === "zbra-hard") {
+        return { id: 0, "word": "youtube", "rhymescore": 0, "pronunciation": "" } as Word;
+    }
 
     const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
 
-    const response: Word[] = await sql`
-    WITH OrderedScores AS (
-      SELECT *,
-        NTILE(3) OVER (ORDER BY rhymescore) AS Third
-      FROM words
-    )
-    SELECT *
-    FROM OrderedScores
-    WHERE Third = ${thirdFromDifficulty(difficulty)}
-    ORDER BY RANDOM()
-    LIMIT 1;`;
-
-    return response[0];
+    if (difficulty === "zbra-easy") {
+        // Top 10% of rhymescore
+        const response: Word[] = await sql`
+            WITH Percentiles AS (
+                SELECT *,
+                    NTILE(10) OVER (ORDER BY rhymescore DESC) AS Decile
+                FROM words
+            )
+            SELECT *
+            FROM Percentiles
+            WHERE Decile = 1
+            ORDER BY RANDOM()
+            LIMIT 1;
+        `;
+        return response[0];
+    } else {
+        const response: Word[] = await sql`
+            WITH OrderedScores AS (
+                SELECT *,
+                    NTILE(3) OVER (ORDER BY rhymescore) AS Third
+                FROM words
+            )
+            SELECT *
+            FROM OrderedScores
+            WHERE Third = ${thirdFromDifficulty(difficulty)}
+            ORDER BY RANDOM()
+            LIMIT 1;
+        `;
+        return response[0];
+    }
 }
