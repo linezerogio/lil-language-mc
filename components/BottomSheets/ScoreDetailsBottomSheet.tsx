@@ -147,6 +147,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                       The longer each of your sentences are, the higher this score will be.
                     </p>
                   </div>
+                  {mode !== 'Endless Mode' && (
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <Image src="/icons/Speed.svg" width={24} height={24} alt="Speed" />
@@ -156,6 +157,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                       The more time remaining, the higher this score is.
                     </p>
                   </div>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
@@ -284,6 +286,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                   </div>
 
                   {/* Speed Card */}
+                  {mode !== 'Endless Mode' && (
                   <div
                     className="bg-white dark:bg-[#1B1C1D] rounded-lg p-4"
                     onClick={() => setIsExpanded(true)}
@@ -322,6 +325,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                       inactiveColor={darkMode ? "#343737" : "#F5F5F5"}
                     />
                   </div>
+                  )}
                 </div>
               ) : (
                 /* Expanded View */
@@ -517,7 +521,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                   </div>
 
                   {/* Length and Speed Section */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className={`grid ${mode !== 'Endless Mode' ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                     {/* Length Section */}
                     <div
                       className="bg-white dark:bg-[#1B1C1D] rounded-lg p-4"
@@ -600,6 +604,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                     </div>
 
                     {/* Speed Section */}
+                    {mode !== 'Endless Mode' && (
                     <div
                       className="bg-white dark:bg-[#1B1C1D] rounded-lg p-4"
                       onClick={() => setIsExpanded(false)}
@@ -666,6 +671,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
                         )}
                       </div>
                     </div>
+                    )}
                   </div>
                 </div>
               )}

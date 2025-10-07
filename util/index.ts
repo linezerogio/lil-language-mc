@@ -15,6 +15,7 @@ export function arraysEqual(a: Array<any>, b: Array<any>) {
 }
 
 export const getLastWord = (lines: string[]) => {
+  if (lines.length === 0) return '';
   const lastLine = lines[lines.length - 1];
   const words = lastLine.split(' ');
   return words[words.length - 1];

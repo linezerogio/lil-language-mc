@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import { DIFFICULTY_SETTINGS } from '@/util/settings';
 
 export type Word = {
     id: number;
@@ -145,11 +146,12 @@ export async function getWordByDifficulty(difficulty: "easy" | "medium" | "hard"
     const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
 
     if (difficulty === "zbra-easy") {
-        // Top 10% of rhymescore
+        // Top decile from settings
+        const { ntileSeparator } = DIFFICULTY_SETTINGS['zbra-easy'].wordSelection;
         const response: Word[] = await sql`
             WITH Percentiles AS (
                 SELECT *,
-                    NTILE(10) OVER (ORDER BY rhymescore DESC) AS Decile
+                    NTILE(${ntileSeparator}) OVER (ORDER BY rhymescore DESC) AS Decile
                 FROM words
             )
             SELECT *
@@ -160,18 +162,98 @@ export async function getWordByDifficulty(difficulty: "easy" | "medium" | "hard"
         `;
         return response[0];
     } else {
+        // Tertiles via settings; use DESC so Third=1 is top third
+        const { ntileValue } = DIFFICULTY_SETTINGS[difficulty].wordSelection;
         const response: Word[] = await sql`
             WITH OrderedScores AS (
                 SELECT *,
-                    NTILE(3) OVER (ORDER BY rhymescore) AS Third
+                    NTILE(3) OVER (ORDER BY rhymescore DESC) AS Third
                 FROM words
             )
             SELECT *
             FROM OrderedScores
-            WHERE Third = ${thirdFromDifficulty(difficulty)}
+            WHERE Third = ${ntileValue}
             ORDER BY RANDOM()
             LIMIT 1;
         `;
         return response[0];
     }
+}
+
+export type Submission = {
+    id: number;
+    lines: string[];
+    score: number;
+    played_on: Date;
+    keyword: string;
+    mode: '4-Bar Mode' | 'Rapid Fire Mode' | 'Endless Mode';
+    difficulty: 'easy' | 'medium' | 'hard' | 'zbra-easy' | 'zbra-hard';
+};
+
+export async function saveSubmission(
+    lines: string[], 
+    score: number, 
+    keyword: string, 
+    mode: '4-Bar Mode' | 'Rapid Fire Mode' | 'Endless Mode',
+    difficulty: 'easy' | 'medium' | 'hard' | 'zbra-easy' | 'zbra-hard',
+) {
+    if (process.env.DATABASE_URL === undefined) {
+        return;
+    }
+
+    const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
+
+    const response = await sql`
+        INSERT INTO submissions (lines, score, keyword, mode, difficulty) 
+        VALUES (${lines}, ${score}, ${keyword}, ${mode}, ${difficulty})
+        RETURNING id
+    `;
+
+    return response[0]?.id;
+}
+
+export async function getSubmission(id: number) {
+    if (process.env.DATABASE_URL === undefined) {
+        return;
+    }
+
+    const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
+
+    const response: Submission[] = await sql`
+        SELECT * FROM submissions WHERE id=${id}
+    `;
+
+    if (response.length === 0) {
+        return null;
+    }
+
+    return response[0];
+}
+
+export async function getMaxSubmissionScore() {
+    if (process.env.DATABASE_URL === undefined) {
+        return 0;
+    }
+
+    const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
+
+    const response: Array<{ max: number | null }> = await sql`
+        SELECT MAX(score) as max FROM submissions
+    `;
+
+    return Number(response[0]?.max ?? 0);
+}
+
+export async function getMaxWordScore(word: string) {
+    if (process.env.DATABASE_URL === undefined) {
+        return 0;
+    }
+
+    const sql = postgres(process.env.DATABASE_URL, { ssl: 'require' });
+
+    const response: Array<{ max: number | null }> = await sql`
+        SELECT MAX(score) as max FROM submissions WHERE keyword=${word}
+    `;
+
+    return Number(response[0]?.max ?? 0);
 }

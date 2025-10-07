@@ -1,42 +1,39 @@
-
 'use client'
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Difficulty } from '@/types/difficulty';
-import { Mode } from '@/types/mode';
-import ScoreBreakdown from '@/types/breakdown';
 import useIsMobile from '../hooks/useIsMobile';
 import Intro from './FreestylePhases/Intro';
-import Rapping from './FreestylePhases/Rapping';
+import EndlessRapping from './FreestylePhases/EndlessRapping';
 import Score from './FreestylePhases/Score';
 import useCountdown from '../hooks/useCountdown';
-import useRappingTimer from '../hooks/useRappingTimer';
-import useLines from '../hooks/useLines';
+import useEndlessTimer from '../hooks/useEndlessTimer';
+import useEndlessLines from '../hooks/useEndlessLines';
 import { getDifficultyOptions, gameModeOptions } from '@/util/options';
+import { evaluateLine } from '@/util/evaluateRhyme';
 import { evaluateSubmission } from '@/util/evaluate';
-import { getEffectiveTimeSeconds } from '@/util/settings';
+import { ENDLESS_PERFECT_RHYME_REFRESH, ENDLESS_NEAR_RHYME_BONUS } from '@/util/settings';
+import ScoreBreakdown from '@/types/breakdown';
+import { Mode } from '@/types/mode';
 
-
-
-export default function FreestyleForm({ word, difficulty }: { word: string, difficulty: Difficulty }) {
+export default function EndlessForm({ word, difficulty }: { word: string, difficulty: Difficulty }) {
     const router = useRouter();
     const isMobile = useIsMobile();
-    const [newGameMode, setNewGameMode] = useState<Mode>('4-Bar Mode');
-    const effectiveTotalTime = useMemo(() => getEffectiveTimeSeconds(newGameMode, difficulty), [newGameMode, difficulty]);
 
     const [pageState, setPageState] = useState<'intro' | 'rapping' | 'score'>('intro');
-
-    const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
+    const [totalScore, setTotalScore] = useState<number>(0);
+    const [score, setScore] = useState<number>(0);
+    const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown>(new ScoreBreakdown());
     const [showQuitConfirmation, setShowQuitConfirmation] = useState<boolean>(false);
-
+    const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
+    
     // Handle browser back button for quit confirmation
     useEffect(() => {
         const handlePopState = (event: PopStateEvent) => {
             if (pageState === 'rapping') {
                 event.preventDefault();
                 setShowQuitConfirmation(true);
-                // Push the current state back to prevent actual navigation
                 window.history.pushState(null, '', window.location.href);
             }
         };
@@ -49,7 +46,6 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         };
 
         if (pageState === 'rapping') {
-            // Add a history entry to catch back button
             window.history.pushState(null, '', window.location.href);
             window.addEventListener('popstate', handlePopState);
             window.addEventListener('beforeunload', handleBeforeUnload);
@@ -71,19 +67,63 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     };
 
     const { secondsLeft: countdownTimeLeft, reset: resetCountdown } = useCountdown(3, pageState === 'intro', () => {
-                setPageState('rapping');
+        setPageState('rapping');
     });
 
-    const { timeLeft, timePercentageLeft, reset: resetRappingTimer } = useRappingTimer(effectiveTotalTime, pageState === 'rapping', () => submit());
+    const handleGameOver = async () => {
+        // Calculate final score based on all completed lines (no time bonus/penalty for endless)
+        const lines = completedLines.map(line => line.text);
+        const { score: finalScore, scoreBreakdown: finalBreakdown } = await evaluateSubmission(lines, word, 0, 0);
+        setScore(finalScore);
+        setScoreBreakdown(finalBreakdown);
+        
+        // Save submission to database
+        try {
+            await fetch('/api/submissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    lines,
+                    score: finalScore,
+                    keyword: word,
+                    mode: 'Endless Mode',
+                    difficulty,
+                    scoreBreakdown: finalBreakdown
+                }),
+            });
+        } catch (error) {
+            console.error('Failed to save submission:', error);
+        }
+        
+        setPageState('score');
+    };
 
-    const { lines, setLines, inputRefs, updateLines, handleKeyPress, reset: resetLines } = useLines(() => submit());
+    const { timeLeft, timePercentageLeft, refreshTimer, fullRefresh, reset: resetTimer } = useEndlessTimer(
+        pageState === 'rapping' && !isEvaluating, 
+        handleGameOver
+    );
 
-    const [score, setScore] = useState<number>(0);
-    const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown>(new ScoreBreakdown());
+    const { 
+        currentLine, 
+        completedLines, 
+        inputRef,
+        updateCurrentLine, 
+        submitLine, 
+        reset: resetLines 
+    } = useEndlessLines();
 
     const [newDifficulty, setNewDifficulty] = useState<Difficulty>(difficulty);
     const [difficultyMenuOpen, setDifficultyMenuOpen] = useState<boolean>(false);
     const [difficultyBottomSheetOpen, setDifficultyBottomSheetOpen] = useState<boolean>(false);
+
+    const [newGameMode, setNewGameMode] = useState<Mode>('Endless Mode');
+    const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
+    const [gameModeBottomSheetOpen, setGameModeBottomSheetOpen] = useState<boolean>(false);
+    const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
+
+    const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
 
     const handleDifficultyButton = (difficulty: Difficulty) => {
         if (isMobile) {
@@ -100,12 +140,10 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         setNewDifficulty(selectedDifficulty);
     }
 
-    // Handle easter egg difficulty change from Header
     const handleEasterEggDifficultyChange = (newDifficulty: Difficulty) => {
         setNewDifficulty(newDifficulty);
     };
 
-    // Map ZBRA difficulties to base difficulties for routing
     const getRouteDifficulty = (difficulty: Difficulty): string => {
         switch (difficulty) {
             case 'zbra-easy':
@@ -117,8 +155,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         }
     };
 
-    const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
-    const [gameModeBottomSheetOpen, setGameModeBottomSheetOpen] = useState<boolean>(false);
+    const difficultyOptions = useMemo(() => getDifficultyOptions(newDifficulty), [newDifficulty]);
 
     const handleGameModeButton = (gameMode: "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode") => {
         if (isMobile) {
@@ -135,12 +172,6 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         setNewGameMode(selectedMode as Mode);
     }
 
-    // Difficulty options configuration
-    const difficultyOptions = useMemo(() => getDifficultyOptions(newDifficulty), [newDifficulty]);
-
-    // Game mode options come from util/options
-
-    // Wrapper functions for type safety
     const handleDifficultySelectWrapper = (mode: string) => {
         handleDifficultySelect(mode as Difficulty);
     };
@@ -157,6 +188,33 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
         handleGameModeButton(mode as "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode");
     };
 
+    const handleKeyPress = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            
+            if (currentLine.trim() && !isEvaluating) {
+                setIsEvaluating(true);
+                
+                // Evaluate the rhyme quality
+                const rhymeQuality = await evaluateLine(currentLine, word);
+                
+                // Update timer based on rhyme quality
+                if (rhymeQuality === 'perfect') {
+                    fullRefresh();
+                    setTotalScore(prev => prev + 100); // Award points for perfect rhyme
+                } else if (rhymeQuality === 'near') {
+                    refreshTimer(ENDLESS_NEAR_RHYME_BONUS);
+                    setTotalScore(prev => prev + 50); // Award points for near rhyme
+                }
+                
+                // Submit the line
+                submitLine(rhymeQuality);
+                
+                setIsEvaluating(false);
+            }
+        }
+    };
+
     const getRouteGameMode = (gameMode: "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode"): string => {
         switch (gameMode) {
             case 'Endless Mode':
@@ -169,52 +227,24 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     const reset = () => {
         setPageState('intro');
         resetCountdown(3);
-        resetRappingTimer();
+        resetTimer();
         resetLines();
-        setScore(0);
+        setTotalScore(0);
         router.replace('/' + getRouteGameMode(newGameMode) + '/' + getRouteDifficulty(newDifficulty));
     };
-
-    const submit = async () => {
-        const { score, scoreBreakdown } = await evaluateSubmission(lines, word, timeLeft, timePercentageLeft);
-        setScoreBreakdown(scoreBreakdown);
-        // @ts-ignore
-        setScore(score);
-        
-        // Save submission to database
-        try {
-            await fetch('/api/submissions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    lines: lines.filter(line => line.trim() !== ''),
-                    score,
-                    keyword: word,
-                    mode: '4-Bar Mode',
-                    difficulty,
-                    scoreBreakdown
-                }),
-            });
-        } catch (error) {
-            console.error('Failed to save submission:', error);
-        }
-        
-        setPageState('score');
-    }
 
     if (pageState === "intro") {
         return <Intro countdownTimeLeft={countdownTimeLeft} />
     } else if (pageState === "rapping") {
         return (
-            <Rapping
+            <EndlessRapping
                 word={word}
                 difficulty={difficulty}
-                lines={lines}
-                inputRefs={inputRefs}
+                currentLine={currentLine}
+                completedLines={completedLines}
+                inputRef={inputRef}
                 timePercentageLeft={timePercentageLeft}
-                updateLines={updateLines}
+                updateCurrentLine={updateCurrentLine}
                 handleKeyPress={handleKeyPress}
                 showQuitConfirmation={showQuitConfirmation}
                 onQuitConfirm={handleQuitConfirm}
@@ -222,15 +252,17 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
             />
         )
     } else if (pageState === "score") {
+        const lines = completedLines.map(line => line.text);
         return (
             <Score
                 word={word}
-                        score={score}
-                        scoreBreakdown={scoreBreakdown}
-                        difficulty={difficulty}
+                score={score}
+                scoreBreakdown={scoreBreakdown}
+                difficulty={difficulty}
                 newDifficulty={newDifficulty}
-                        lines={lines}
+                lines={lines}
                 inputRefs={inputRefs}
+                mode="Endless Mode"
                 difficultyOptions={difficultyOptions}
                 difficultyMenuOpen={difficultyMenuOpen}
                 onDifficultySelect={handleDifficultySelectWrapper}
@@ -250,10 +282,11 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 onGameModeBottomSheetSelect={handleGameModeSelect}
                 scoreDetailsBottomSheetOpen={scoreDetailsBottomSheetOpen}
                 onScoreDetailsBottomSheetClose={() => setScoreDetailsBottomSheetOpen(false)}
-                        onScoreBreakdownClick={() => setScoreDetailsBottomSheetOpen(true)}
+                onScoreBreakdownClick={() => setScoreDetailsBottomSheetOpen(true)}
                 onEasterEggDifficultyChange={handleEasterEggDifficultyChange}
                 onPlayAgain={() => reset()}
             />
         )
     }
 }
+

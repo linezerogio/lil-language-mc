@@ -14,14 +14,6 @@ const bonusPointsWeight = 0.2;
 const penaltyWeight = 0.2;
 
 export const getScore = ({ rhymeQuality, syllableMatch, complexity, bonusPoints, penalty, wordCountPenalty }: { rhymeQuality: number, syllableMatch: number, complexity: number, bonusPoints: number, penalty: number, wordCountPenalty: number }) => {
-    console.log({
-        rhymeQuality,
-        syllableMatch,
-        complexity,
-        bonusPoints,
-        penalty,
-        wordCountPenalty
-    })
     return Math.round(((rhymeQuality * rhymeQualityWeight + syllableMatch * syllableMatchWeight + complexity * complexityWeight + bonusPoints * bonusPointsWeight) * baseScore - (penalty * penaltyWeight)) * wordCountPenalty);
 }
 
@@ -31,11 +23,9 @@ export const getScore = ({ rhymeQuality, syllableMatch, complexity, bonusPoints,
 //     const totalSentences = lines.length;
 //     const totalSyllables = syllable(joinedLines);
 
-//     console.log(totalWords, totalSentences, totalSyllables);
 
 //     const fk = 0.39 * (totalWords / totalSentences) + 11.8 * (totalSyllables / totalWords) - 15.59;
 
-//     console.log(fk);
 
 //     if (isNaN(fk)) {
 //         return 0.3;
@@ -86,7 +76,7 @@ export const getSyllableMatch = (lines: string[]) => {
 
     for (let i = 0; i < lines.length; i += 2) {
         if (lines.length >= i + 2) {
-            console.log(syllable(lines[i]), syllable(lines[i + 1]));
+            // console.log(syllable(lines[i]), syllable(lines[i + 1]));
             const diff = Math.abs(syllable(lines[i]) - syllable(lines[i + 1]));
             comparisons.push(diff)
         }

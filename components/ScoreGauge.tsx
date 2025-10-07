@@ -1,22 +1,24 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import ScoreBreakdown from "@/types/breakdown";
 
 interface ScoreGaugeProps {
   score: number;
-  max: number;
   word: string;
   scoreBreakdown: ScoreBreakdown;
   difficulty: string;
+  mode?: string;
   lines: string[];
   onScoreBreakdownClick: () => void;
 }
 
 const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   score,
-  max,
   word,
   scoreBreakdown,
   difficulty,
+  mode = '4-Bar Mode',
   lines,
   onScoreBreakdownClick
 }) => {
@@ -27,6 +29,9 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   const [height, setHeight] = useState(432);
   const [width, setWidth] = useState(432);
   const [strokeWidth, setStrokeWidth] = useState(22);
+  const [maxScore, setMaxScore] = useState<number>(536);
+  const [maxReady, setMaxReady] = useState<boolean>(mode !== 'Endless Mode');
+  const [animatedPercentage, setAnimatedPercentage] = useState<number>(0);
 
   // Derived geometry
   const radius = width / 2 - 11;
@@ -34,7 +39,8 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   const centerY = width / 2;
   const startAngle = 45;
   const endAngle = 135;
-  const percentage = (score / max) * 100;
+  const targetPercentage = (score / maxScore) * 100;
+  const percentage = maxReady ? animatedPercentage : 0;
   const angle = (percentage / 100) * 270;
   const endAngle2 = 45 - angle;
 
@@ -74,6 +80,67 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    let isCancelled = false;
+    const applyStaticMax = () => { setMaxScore(536); setMaxReady(true); };
+    const fetchMax = async () => {
+      try {
+        const res = await fetch('/api/submissions/max-score?word=' + word, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data: { max?: number } = await res.json();
+        if (!isCancelled && typeof data.max === 'number' && !Number.isNaN(data.max)) {
+          setMaxScore(Math.max(data.max, 1));
+          setMaxReady(true);
+        }
+      } catch {
+        // On error, fall back to static max
+        applyStaticMax();
+      }
+    };
+
+    if (mode === 'Endless Mode') {
+      fetchMax();
+    } else {
+      applyStaticMax();
+    }
+
+    return () => { isCancelled = true; };
+  }, [mode, word]);
+
+  // Animate the gauge fill and arrow once max is known
+  useEffect(() => {
+    if (!maxReady) {
+      setAnimatedPercentage(0);
+      return;
+    }
+
+    let raf = 0;
+    const durationMs = 2000;
+    const start = performance.now();
+    const startPct = animatedPercentage;
+    const endPct = Math.max(0, Math.min(100, targetPercentage));
+
+    // Ease out harder: use easeOutQuint for a steeper, more dramatic ease
+    const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
+    const easeOutCubic = easeOutQuint;
+
+    const step = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / durationMs);
+      const eased = easeOutCubic(t);
+      const current = startPct + (endPct - startPct) * eased;
+      setAnimatedPercentage(current);
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      }
+    };
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // Re-run when max becomes ready or score/max changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maxReady, score, maxScore]);
+
   const inactiveTrackWidth = endAngle - startAngle;
   const gradientWidth = (inactiveTrackWidth * percentage) / 100;
 
@@ -108,28 +175,32 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
-        <path
-          d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX2} ${endY2}`}
-          fill="none"
-          stroke="url(#activeTrackGradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          className="-z-10"
-        />
-        {/* Arrow pointing to the end of active track */}
-        <g transform={`translate(${arrowX}, ${arrowY}) rotate(${arrowRotation})`}>
-          <image
-            href="/icons/gauge_arrow.svg"
-            width="15"
-            height="16"
-            x="-8"
-            y="-8"
-            z={100}
-            style={{
-              filter: darkMode ? 'none' : 'brightness(0) saturate(100%) invert(8%) sepia(6%) saturate(468%) hue-rotate(169deg) brightness(96%) contrast(92%)'
-            }}
-          />
-        </g>
+        {maxReady && (
+          <>
+            <path
+              d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX2} ${endY2}`}
+              fill="none"
+              stroke="url(#activeTrackGradient)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              className="-z-10"
+            />
+            {/* Arrow pointing to the end of active track */}
+            <g transform={`translate(${arrowX}, ${arrowY}) rotate(${arrowRotation})`}>
+              <image
+                href="/icons/gauge_arrow.svg"
+                width="15"
+                height="16"
+                x="-8"
+                y="-8"
+                z={100}
+                style={{
+                  filter: darkMode ? 'none' : 'brightness(0) saturate(100%) invert(8%) sepia(6%) saturate(468%) hue-rotate(169deg) brightness(96%) contrast(92%)'
+                }}
+              />
+            </g>
+          </>
+        )}
       </svg>
       <div className="w-[224px] lg:w-[320px] h-[224px] lg:h-[320px] bg-white dark:bg-[#1B1C1D] rounded-full flex justify-center items-center absolute top-9 lg:top-14 left-9 lg:left-14">
         <div className="w-[200px] lg:w-[285px] h-[200px] lg:h-[285px] border-2 border-solid border-[#f5f5f5] dark:border-[#343737] rounded-full flex flex-col justify-center items-center">
@@ -140,7 +211,7 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
             Click for score details
           </p>
           <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
-            4-Bar Mode | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+            {mode} | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
           </p>
           <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
             &quot;{word.charAt(0).toUpperCase() + word.substring(1)}&quot;

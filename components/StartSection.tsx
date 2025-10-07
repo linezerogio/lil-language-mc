@@ -1,10 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import { useLottie } from "lottie-react";
-import darkModeToggle from "../public/darkModeToggle.json";
 import Header from './Header';
 import useIsMobile from '../hooks/useIsMobile';
 import DifficultyBottomSheet from './BottomSheets/DifficultyBottomSheet';
@@ -12,13 +9,9 @@ import ModeBottomSheet from './BottomSheets/ModeBottomSheet';
 import ModeSelector from './ModeSelector';
 import { Difficulty } from '@/types/difficulty';
 
-// Simple cn utility for conditional classNames
-function cn(...args: any[]) {
-  return args
-    .flat()
-    .filter(Boolean)
-    .join(' ');
-}
+import { getDifficultyOptions, gameModeOptions } from '@/util/options';
+
+
 
 export default function StartSection() {
   const router = useRouter();
@@ -79,130 +72,17 @@ export default function StartSection() {
     setNewGameMode(selectedMode);
   }
 
+  const getRouteGameMode = (gameMode: "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode"): string => {
+    switch (gameMode) {
+      case 'Endless Mode':
+        return 'endless';
+      default:
+        return 'freestyle';
+    }
+  };
+
   // Difficulty options configuration - dynamically include ZBRA modes only if selected
-  const difficultyOptions = useMemo(() => {
-    const baseOptions = [
-      {
-        value: "easy" as Difficulty,
-        name: "Easy",
-        icon: "/Easy.svg",
-        description: "Good for beginners or for maximizing rhymes.",
-        iconProps: {
-            width: 24,
-            height: 14.744,
-            mdWidth: 40,
-            mdHeight: 24.57,
-          className: "mr-[10px]"
-        }
-      },
-      {
-        value: "medium" as Difficulty,
-        name: "Medium", 
-        icon: "/Medium.svg",
-        description: "Little bit of a challenge to push your limit.",
-        iconProps: {
-            width: 24,
-            height: 14.406,
-            mdWidth: 40,
-            mdHeight: 24.01,
-          className: "mr-[10px]"
-        }
-      },
-      {
-        value: "hard" as Difficulty,
-        name: "Hard",
-        icon: "/Hard.svg", 
-        description: "Some of the most difficult words to rhyme with.",
-        iconProps: {
-            width: 24,
-            height: 15.78,
-            mdWidth: 40,
-            mdHeight: 26.3,
-          className: "mr-[10px]"
-        }
-      }
-    ];
-
-    // Add ZBRA modes only if currently selected
-    if (difficulty === "zbra-easy") {
-      baseOptions.push({
-        value: "zbra-easy" as Difficulty,
-        name: "ZBRA Easy",
-        icon: "/icons/ZBRAEasy.svg",
-        description: "Good for beginner Zbra’s so they can finally reach 500 pts maybe.",
-        iconProps: {
-            width: 24,
-            height: 14.744,
-            mdWidth: 40,
-            mdHeight: 24.57,
-          className: "mr-[10px]"
-        }
-      });
-    }
-
-    if (difficulty === "zbra-hard") {
-      baseOptions.push({
-        value: "zbra-hard" as Difficulty,
-        name: "ZBRA Hard",
-        icon: "/icons/ZBRAHard.svg",
-        description: "Very difficult, only for the trained zbra’s, not just any zbra.",
-        iconProps: {
-            width: 24,
-            height: 15.78,
-            mdWidth: 40,
-            mdHeight: 26.3,
-          className: "mr-[10px]"
-        }
-      });
-    }
-
-    return baseOptions;
-  }, [difficulty]);
-
-  // Game mode options configuration
-  const gameModeOptions = [
-    {
-      value: "4-Bar Mode",
-      name: "4-Bar Mode",
-      icon: "/icons/FourBarMode.svg",
-      description: "Write 4 sentences that rhyme with the keyword within the time limit.",
-      iconProps: {
-          width: 16,
-          height: 16,
-          mdWidth: 23,
-          mdHeight: 24,
-        className: "mr-[10px]"
-      }
-    },
-    {
-      value: "Rapid Fire Mode",
-      name: "Rapid Fire Mode",
-      icon: "/icons/RapidFireMode.svg",
-      description: "Write 2 sentences that rhyme with each keyword. Complete as many keywords as you can within the time limit.",
-      disabled: true,
-      iconProps: {
-          width: 16,
-          height: 16,
-          mdWidth: 21.6,
-          mdHeight: 27,
-        className: "mr-[10px]"
-      }
-    },
-    {
-      value: "Endless Mode",
-      name: "Endless Mode",
-      icon: "/icons/EndlessMode.svg",
-      description: "Write as many sentences as possible that rhyme until you run out of lives.",
-      disabled: true,
-      iconProps: {
-          width: 16,
-          height: 16,
-          mdWidth: 25.15,
-          mdHeight: 12.15,
-        className: "mr-[10px]"
-      }
-    }
-  ];
+  const difficultyOptions = getDifficultyOptions(difficulty);
 
   // Wrapper functions for type safety
   const handleDifficultySelectWrapper = (mode: string) => {
@@ -231,6 +111,7 @@ export default function StartSection() {
           onDifficultyChange={handleEasterEggDifficultyChange}
         />
       </div>
+      <div className='flex-1 flex flex-col justify-center'>
       <div className="flex flex-col lg:flex-row justify-center items-center max-w-[2560px] px-[30px] lg:px-[100px] mx-auto flex-1 lg:flex-none pb-[27px] lg:pb-0">
         <div className="flex-col justify-center items-center flex gap-10 flex-1 lg:flex-none">
           <div className="flex-col justify-center items-center flex flex-1 lg:flex-none">
@@ -266,7 +147,7 @@ export default function StartSection() {
         </div>
       </div>
 
-      <div className="hidden lg:flex mt-[30px] justify-center h-[73px]">
+      <div className="hidden lg:flex mt-[50px] justify-center h-[73px]">
         {/* Desktop View */}
         <ModeSelector
           options={difficultyOptions}
@@ -280,7 +161,7 @@ export default function StartSection() {
 
         <button
           className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black text-[18px] lg:text-[25px] font-bold lg:w-[286px] font-[termina] hidden lg:block"
-          onClick={() => router.push(`/freestyle/${getRouteDifficulty(difficulty)}`)}
+          onClick={() => router.push(`/${getRouteGameMode(newGameMode)}/${getRouteDifficulty(difficulty)}`)}
         >
           PLAY
         </button>
@@ -295,6 +176,7 @@ export default function StartSection() {
           isMenuOpen={gameModeMenuOpen}
           className="hidden lg:flex"
         />
+      </div>
       </div>
       <footer className="w-full mx-auto text-center pb-[20px] opacity-50 font-[neulis-sans] font-bold text-[#565757] hidden lg:block">
         ©{new Date().getFullYear()} LineZero Studio. All rights reserved.

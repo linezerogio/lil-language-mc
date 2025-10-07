@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image'
 import ScoreBreakdown from '@/types/breakdown';
@@ -5,6 +7,8 @@ import { Progress } from '@radix-ui/react-progress';
 import LinearProgressBar from './LinearProgressBar';
 import useIsMobile from '../hooks/useIsMobile';
 import ScoreDetailsBottomSheet from './BottomSheets/ScoreDetailsBottomSheet';
+
+
 
 type Modifier = {
     text: string;
@@ -29,11 +33,13 @@ interface ScoreBreakdownViewProps {
 }
 
 const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, percentage, modifiers, showInfo, onInfoClick }) => {
-    const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+        setDarkMode(mediaQuery.matches);
 
         mediaQuery.addEventListener('change', handleChange);
         return () => {
@@ -122,7 +128,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown,
                 <button className='absolute top-[25px] right-[25px] w-[15px] h-[15px] z-30' onClick={() => setShowInfo(!showInfo)}>
                     <Image src="/icons/Close.svg" width={20} height={20} alt="Close Icon" />
                 </button>    
-                {["Rhyme", "Flow", "Length", "Speed"].map((type) => (
+                {["Rhyme", "Flow", "Length", ...(mode !== 'Endless Mode' ? ["Speed"] : [])].map((type) => (
                     <div key={type} className='flex flex-1 flex-col p-[25px]'>
                     <div className='flex flex-col h-[76px] w-full'>
                         <div className='flex items-center mb-[15px] h-[50px]'>
@@ -149,7 +155,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown,
             <ScoreBreakdownSection type="Rhyme" percentage={rhymeBreakdown.percentage * 100} modifiers={rhymeModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
             <ScoreBreakdownSection type="Flow" percentage={flowBreakdown.percentage * 100} modifiers={flowModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
             <ScoreBreakdownSection type="Length" percentage={lengthBreakdown.percentage * 100} modifiers={lengthModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
-            <ScoreBreakdownSection type="Speed" percentage={speedBreakdown.percentage * 100} modifiers={speedModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />
+            {mode !== 'Endless Mode' && <ScoreBreakdownSection type="Speed" percentage={speedBreakdown.percentage * 100} modifiers={speedModifiers} showInfo={showInfo} onInfoClick={handleInfoButtonClick} />}
             
             {/* Bottom Sheet for Mobile */}
             <ScoreDetailsBottomSheet
