@@ -1,13 +1,11 @@
 import { Difficulty } from '@/types/difficulty';
 import { Mode } from '@/types/mode';
 
-
-
 // Endless Mode Configuration
-export const ENDLESS_STARTING_TIME = 300; // seconds
-export const ENDLESS_PERFECT_RHYME_REFRESH = 30; // seconds (full refresh)
-export const ENDLESS_NEAR_RHYME_BONUS = 15; // seconds
-export const ENDLESS_MAX_TIME = 300; // seconds (cap)
+export const ENDLESS_STARTING_TIME = 30; // seconds
+export const ENDLESS_PERFECT_RHYME_REFRESH = 20; // seconds (full refresh)
+export const ENDLESS_NEAR_RHYME_BONUS = 10; // seconds
+export const ENDLESS_MAX_TIME = 30; // seconds (cap)
 
 export type DifficultySettings = {
     timeMultiplier: number; // multiply base or mode default time
