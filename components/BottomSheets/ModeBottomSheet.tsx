@@ -93,7 +93,7 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
                 Endless Mode
               </div>
               <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
-                Write as many sentences as possible that rhyme until you run out of lives.
+                Write as many sentences as possible that rhyme with the keyword within the time limit. Each rhyme resets the timer.
               </p>
               <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
                 <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt="Lock Icon" />

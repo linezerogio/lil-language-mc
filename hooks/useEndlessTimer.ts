@@ -19,15 +19,15 @@ export default function useEndlessTimer(isActive: boolean, onTimeout: () => void
     }, [isActive, timeLeft]);
 
     const refreshTimer = useCallback((amount: number) => {
-        setTimeLeft(prev => Math.min(prev + amount, ENDLESS_MAX_TIME));
+        setTimeLeft(prev => Math.min(prev + amount, ENDLESS_MAX_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier));
     }, []);
 
     const fullRefresh = useCallback(() => {
-        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
+        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
     }, [ difficulty ]);
 
     const reset = useCallback(() => {
-        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
+        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
     }, [ difficulty ]);
 
     return { timeLeft, timePercentageLeft, refreshTimer, fullRefresh, reset } as const;

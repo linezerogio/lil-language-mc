@@ -60,7 +60,7 @@ export const gameModeOptions = [
         value: 'Endless Mode',
         name: 'Endless Mode',
         icon: '/icons/EndlessMode.svg',
-        description: 'Write as many sentences as possible that rhyme until you run out of lives.',
+        description: 'Write as many sentences as possible that rhyme with the keyword within the time limit. Each rhyme resets the timer.',
         iconProps: { width: 16, height: 16, mdWidth: 25.15, mdHeight: 12.15, className: 'mr-[10px]' }
     },
     {
