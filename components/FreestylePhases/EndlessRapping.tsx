@@ -6,6 +6,7 @@ import { Difficulty } from '@/types/difficulty';
 import TimeProgressBar from '../TimeProgressBar';
 import QuitConfirmationModal from '../QuitConfirmationModal';
 import { CompletedLine } from '@/hooks/useEndlessLines';
+import { getFunnyMiss } from '@/util';
 
 type EndlessRappingProps = {
     word: string;
@@ -19,6 +20,7 @@ type EndlessRappingProps = {
     showQuitConfirmation: boolean;
     onQuitConfirm: () => void;
     onQuitCancel: () => void;
+    onEndEarly: () => void;
 };
 
 export default function EndlessRapping({
@@ -32,18 +34,38 @@ export default function EndlessRapping({
     handleKeyPress,
     showQuitConfirmation,
     onQuitConfirm,
-    onQuitCancel
+    onQuitCancel,
+    onEndEarly
 }: EndlessRappingProps) {
-    const getRhymeIndicator = (rhymeQuality: 'perfect' | 'near' | 'bad') => {
-        if (rhymeQuality === 'bad') return null;
-        const color = rhymeQuality === 'perfect' ? '#5CE2C7' : '#5DE36A';
+    const getRhymeIndicator = (rhymeQuality: 'perfect' | 'near' | 'repeated' | 'short' | 'bad') => {
+        const color = rhymeQuality === 'perfect' ? '#5CE2C7' : rhymeQuality === 'near' ? '#5DE36A' : '#D70114';
         return (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                {/* circular checkmark */}
-                <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill={color} d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20zm-1.2 13.2l-3.5-3.5l1.4-1.4l2.1 2.1l4.9-4.9l1.4 1.4l-6.3 6.3z"/>
-                </svg>
-                <span className="font-bold" style={{ color }}>{rhymeQuality === 'perfect' ? 'Perfect' : 'Near'}</span>
+                <span className="font-bold leading-[18px]" style={{ color }}>
+                    {rhymeQuality === 'perfect'
+                        ? 'Perfect'
+                        : rhymeQuality === 'near'
+                        ? 'Near'
+                        : rhymeQuality === 'repeated'
+                        ? 'Repeat'
+                        : rhymeQuality === 'short'
+                        ? 'Too Short'
+                        : 'Miss'
+                    }
+                </span>
+                {/* Conditional render based on rhymeQuality */}
+                {(rhymeQuality === 'perfect' || rhymeQuality === 'near') && (
+                    <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill={color} d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20zm-1.2 13.2l-3.5-3.5l1.4-1.4l2.1 2.1l4.9-4.9l1.4 1.4l-6.3 6.3z"/>
+                    </svg>
+                )}
+                {(rhymeQuality === 'repeated' || rhymeQuality === 'short' || rhymeQuality === 'bad') && (
+                    <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke={color} strokeWidth="2"/>
+                        <line x1="8" y1="8" x2="16" y2="16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="16" y1="8" x2="8" y2="16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                )}
             </div>
         );
     };
@@ -52,7 +74,7 @@ export default function EndlessRapping({
         <>
             <div className="w-full px-[30px] lg:px-[100px] pb-[30px] lg:pb-[100px] pt-[25px] mx-auto flex flex-col h-[100vh]">
                 <TimeProgressBar percentage={timePercentageLeft} />
-                <div className="flex flex-col w-auto pb-[36px] lg:pb-[220px] pt-[36px] lg:pt-[100px] mx-auto">
+                <div className="flex flex-col w-auto pb-[36px] lg:pb-[45px] pt-[36px] lg:pt-[100px] mx-auto">
                     <div className="flex w-auto content-center items-center">
                         <h1 className='flex-1 text-center pt-[20px] hidden lg:block leading-none font-bold tracking-[0.06em] font-display clamp-word'>
                             {word.toUpperCase()}
@@ -68,6 +90,14 @@ export default function EndlessRapping({
                         <h3 className='flex-1 text-center text-[12px] lg:text-[1.3vw] lg:px-[100px] pt-[20px] leading-none tracking-[0.06em] text-[#8F8F8F]'>
                             Endless Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)}
                         </h3>
+                        <button 
+                            className='text-[14px] lg:text-[16px] font-bold tracking-wider px-6 py-2 rounded-lg bg-[#F5F5F5] dark:bg-[#343737] hover:bg-[#E5E5E5] dark:hover:bg-[#404343] transition-colors mt-[20px]' 
+                            onClick={() => {
+                                onEndEarly();
+                            }}
+                        >
+                            End Game
+                        </button>
                     </div>
                 </div>
 

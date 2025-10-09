@@ -196,11 +196,11 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
                 setIsEvaluating(true);
                 
                 // Evaluate the rhyme quality
-                const rhymeQuality = await evaluateLine(currentLine, word);
+                const rhymeQuality = await evaluateLine(currentLine, completedLines.map(line => line.text), word);
                 
                 // Update timer based on rhyme quality
                 if (rhymeQuality === 'perfect') {
-                    fullRefresh();
+                    refreshTimer(ENDLESS_PERFECT_RHYME_REFRESH);
                     setTotalScore(prev => prev + 100); // Award points for perfect rhyme
                 } else if (rhymeQuality === 'near') {
                     refreshTimer(ENDLESS_NEAR_RHYME_BONUS);
@@ -249,6 +249,7 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
                 showQuitConfirmation={showQuitConfirmation}
                 onQuitConfirm={handleQuitConfirm}
                 onQuitCancel={handleQuitCancel}
+                onEndEarly={() => handleGameOver()}
             />
         )
     } else if (pageState === "score") {

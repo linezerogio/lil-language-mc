@@ -1,23 +1,40 @@
 "use server"
 
 import { getPronunciation } from "@/app/server";
-import { arraysEqual, getLastWord } from '@/util';
+import { arraysEqual, getLastWord, getNumberString } from '@/util';
 
-export type RhymeQuality = 'perfect' | 'near' | 'bad';
+export type RhymeQuality = 'perfect' | 'near' | 'repeated' | 'short' | 'bad';
 
-export async function evaluateLine(line: string, targetWord: string): Promise<RhymeQuality> {
-    if (!line.trim()) {
+const sanitizeLine = (line: string) => {
+    return line.replace(/(\d+)/g, (match) => {
+        return getNumberString(parseInt(match));
+    }).replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
+}
+
+export async function evaluateLine(line: string, allLines: string[], targetWord: string): Promise<RhymeQuality> {
+
+    line = sanitizeLine(line);
+    if (!line) {
         return 'bad';
     }
 
-    const lastWord = getLastWord([line]);
+    const lastWord = getLastWord([line]).toLowerCase();
     if (!lastWord) {
         return 'bad';
     }
 
+    if (line.split(' ').length < 4) {
+        return 'short';
+    }
+
+    const repeatedWords = allLines.filter(l => lastWord === getLastWord([sanitizeLine(l)]).toLowerCase());
+    if (repeatedWords.length > 0) {
+        return 'repeated';
+    }
+
     try {
         const linePronunciation = await getPronunciation(lastWord);
-        const targetWordPronunciation = await getPronunciation(targetWord);
+        const targetWordPronunciation = await getPronunciation(targetWord.toLowerCase());
 
         if (!linePronunciation || !targetWordPronunciation) {
             return 'bad';
