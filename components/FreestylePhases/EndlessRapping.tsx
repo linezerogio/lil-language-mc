@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Difficulty } from '@/types/difficulty';
 import TimeProgressBar from '../TimeProgressBar';
@@ -37,11 +37,57 @@ export default function EndlessRapping({
     onQuitCancel,
     onEndEarly
 }: EndlessRappingProps) {
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const isUserScrollingRef = useRef(false);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Auto-scroll to bottom when new lines are added, unless user has scrolled up
+    useEffect(() => {
+        if (scrollContainerRef.current && !isUserScrollingRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+    }, [completedLines]);
+
+    // Track user scrolling
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 5;
+            
+            isUserScrollingRef.current = !isAtBottom;
+            
+            // Clear existing timeout
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+            
+            // Reset user scrolling flag after a delay if at bottom
+            if (isAtBottom) {
+                scrollTimeoutRef.current = setTimeout(() => {
+                    isUserScrollingRef.current = false;
+                }, 100);
+            }
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => {
+            container.removeEventListener('scroll', handleScroll);
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
+
     const getRhymeIndicator = (rhymeQuality: 'perfect' | 'near' | 'repeated' | 'short' | 'bad') => {
-        const color = rhymeQuality === 'perfect' ? '#5CE2C7' : rhymeQuality === 'near' ? '#5DE36A' : '#D70114';
+        const colorLight = rhymeQuality === 'perfect' ? '#5CE2C7' : rhymeQuality === 'near' ? '#7Fb304' : '#D70114';
+        const colorDark = rhymeQuality === 'perfect' ? '#5CE2C7' : rhymeQuality === 'near' ? '#5DE36A' : '#D70114';
+        
         return (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                <span className="font-bold leading-[18px]" style={{ color }}>
+                <span className="font-bold leading-[18px] text-[var(--rhyme-color-light)] dark:text-[var(--rhyme-color-dark)]" style={{ '--rhyme-color-light': colorLight, '--rhyme-color-dark': colorDark } as React.CSSProperties}>
                     {rhymeQuality === 'perfect'
                         ? 'Perfect'
                         : rhymeQuality === 'near'
@@ -55,19 +101,25 @@ export default function EndlessRapping({
                 </span>
                 {/* Conditional render based on rhymeQuality */}
                 {(rhymeQuality === 'perfect' || rhymeQuality === 'near') && (
-                    <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill={color} d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20zm-1.2 13.2l-3.5-3.5l1.4-1.4l2.1 2.1l4.9-4.9l1.4 1.4l-6.3 6.3z"/>
+                    <svg className="shrink-0 [&_path]:fill-[var(--rhyme-color-light)] dark:[&_path]:fill-[var(--rhyme-color-dark)]" style={{ '--rhyme-color-light': colorLight, '--rhyme-color-dark': colorDark } as React.CSSProperties} width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20zm-1.2 13.2l-3.5-3.5l1.4-1.4l2.1 2.1l4.9-4.9l1.4 1.4l-6.3 6.3z"/>
                     </svg>
                 )}
                 {(rhymeQuality === 'repeated' || rhymeQuality === 'short' || rhymeQuality === 'bad') && (
-                    <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke={color} strokeWidth="2"/>
-                        <line x1="8" y1="8" x2="16" y2="16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-                        <line x1="16" y1="8" x2="8" y2="16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+                    <svg className="shrink-0 [&_circle]:stroke-[var(--rhyme-color-light)] dark:[&_circle]:stroke-[var(--rhyme-color-dark)] [&_line]:stroke-[var(--rhyme-color-light)] dark:[&_line]:stroke-[var(--rhyme-color-dark)]" style={{ '--rhyme-color-light': colorLight, '--rhyme-color-dark': colorDark } as React.CSSProperties} width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" fill="none" strokeWidth="2"/>
+                        <line x1="8" y1="8" x2="16" y2="16" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="16" y1="8" x2="8" y2="16" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
                 )}
             </div>
         );
+    };
+
+    const getRhymeColor = (rhymeQuality: 'perfect' | 'near' | 'repeated' | 'short' | 'bad', isDark: boolean = false) => {
+        if (rhymeQuality === 'perfect') return '#5CE2C7';
+        if (rhymeQuality === 'near') return isDark ? '#5DE36A' : '#7Fb304';
+        return '#D70114';
     };
 
     return (
@@ -101,13 +153,31 @@ export default function EndlessRapping({
                     </div>
                 </div>
 
-                <div className='lg:w-full flex flex-col flex-1 h-full relative overflow-y-auto rounded-[12px] lg:rounded-[25px]'>
+                <div 
+                    ref={scrollContainerRef}
+                    className='lg:w-full flex flex-col flex-1 h-full relative overflow-y-auto rounded-[12px] lg:rounded-[25px]'
+                >
                     {completedLines.map((line, index) => {
+                        const colorLight = getRhymeColor(line.rhymeQuality, false);
+                        const colorDark = getRhymeColor(line.rhymeQuality, true);
+                        
                         return (
-                            <div key={index} className={'p-0 m-0 flex flex-col relative mb-[10px] rounded-[12px] lg:rounded-[25px] border-2 border-[#F5F5F5] dark:border-[#343737] overflow-hidden'}>
+                            <div 
+                                key={index} 
+                                className={'p-0 m-0 flex flex-col relative mb-[10px] rounded-[12px] lg:rounded-[25px] border-2 overflow-hidden min-h-[73px] border-[var(--border-color-light)] dark:border-[var(--border-color-dark)]'}
+                                style={{ '--border-color-light': colorLight, '--border-color-dark': colorDark } as React.CSSProperties}
+                            >
                                 <div className='flex items-center relative'>
-                                    <div className='flex-1 text-start text-[16px] lg:text-2xl py-[15px] lg:pt-[24px] pl-[15px] lg:pl-[40px] pr-[80px] lg:pr-[120px] dark:text-[#E1E3E3] dark:bg-[#1C1E1E] lg:leading-snug'>
-                                        {line.text}
+                                    <div className='flex items-center gap-3 flex-1 text-start text-[16px] lg:text-2xl py-[15px] lg:pt-[24px] pl-[15px] lg:pl-[40px] pr-[80px] lg:pr-[120px] dark:text-[#E1E3E3] dark:bg-[#1C1E1E] lg:leading-snug'>
+                                        <div 
+                                            className='flex-shrink-0 w-[25px] h-[25px] rounded-full flex items-center justify-center text-white text-[14px] font-bold bg-[var(--bg-color-light)] dark:bg-[var(--bg-color-dark)]'
+                                            style={{ '--bg-color-light': colorLight, '--bg-color-dark': colorDark } as React.CSSProperties}
+                                        >
+                                            {index + 1}
+                                        </div>
+                                        <span className='flex-1'>
+                                            {line.text}
+                                        </span>
                                     </div>
                                     {getRhymeIndicator(line.rhymeQuality)}
                                 </div>
@@ -115,7 +185,7 @@ export default function EndlessRapping({
                         )
                     })}
                     
-                    <div className={'p-0 m-0 flex flex-col relative flex-1'}>
+                    <div className={'p-0 m-0 flex flex-col relative flex-1 min-h-[200px]'}>
                         <TextareaAutosize
                             placeholder='Type your bars...'
                             ref={inputRef}
@@ -137,4 +207,3 @@ export default function EndlessRapping({
         </>
     );
 }
-
