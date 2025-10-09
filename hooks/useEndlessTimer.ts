@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { ENDLESS_STARTING_TIME, ENDLESS_MAX_TIME } from '@/util/settings';
+import { ENDLESS_STARTING_TIME, ENDLESS_MAX_TIME, DIFFICULTY_SETTINGS } from '@/util/settings';
+import { Difficulty } from '@/types/difficulty';
 
-export default function useEndlessTimer(isActive: boolean, onTimeout: () => void) {
-    const [timeLeft, setTimeLeft] = useState<number>(ENDLESS_STARTING_TIME);
-    const timePercentageLeft = useMemo(() => (timeLeft / ENDLESS_STARTING_TIME) * 100, [timeLeft]);
+export default function useEndlessTimer(isActive: boolean, onTimeout: () => void, difficulty: Difficulty) {
+    const [timeLeft, setTimeLeft] = useState<number>(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
+    const timePercentageLeft = useMemo(() => (timeLeft / ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier) * 100, [timeLeft, difficulty]);
 
     useEffect(() => {
         if (!isActive) return;
@@ -22,12 +23,12 @@ export default function useEndlessTimer(isActive: boolean, onTimeout: () => void
     }, []);
 
     const fullRefresh = useCallback(() => {
-        setTimeLeft(ENDLESS_STARTING_TIME);
-    }, []);
+        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
+    }, [ difficulty ]);
 
     const reset = useCallback(() => {
-        setTimeLeft(ENDLESS_STARTING_TIME);
-    }, []);
+        setTimeLeft(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
+    }, [ difficulty ]);
 
     return { timeLeft, timePercentageLeft, refreshTimer, fullRefresh, reset } as const;
 }

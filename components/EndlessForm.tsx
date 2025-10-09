@@ -102,7 +102,8 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
 
     const { timeLeft, timePercentageLeft, refreshTimer, fullRefresh, reset: resetTimer } = useEndlessTimer(
         pageState === 'rapping' && !isEvaluating, 
-        handleGameOver
+        handleGameOver,
+        difficulty
     );
 
     const { 
