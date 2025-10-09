@@ -95,6 +95,10 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
               <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
                 Write as many sentences as possible that rhyme until you run out of lives.
               </p>
+              <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
+                <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt="Lock Icon" />
+                <p className="text-[12px] text-white font-bold">Coming Soon</p>
+              </div>
             </button>
 
             <button
