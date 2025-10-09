@@ -27,7 +27,7 @@ export async function evaluateLine(line: string, allLines: string[], targetWord:
         return 'short';
     }
 
-    const repeatedWords = allLines.filter(l => lastWord === getLastWord([sanitizeLine(l)]).toLowerCase());
+    const repeatedWords = allLines.filter(l => l.split(' ').length > 3).filter(l => lastWord === getLastWord([sanitizeLine(l)]).toLowerCase());
     if (repeatedWords.length > 0) {
         return 'repeated';
     }
