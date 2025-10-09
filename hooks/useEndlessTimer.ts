@@ -6,7 +6,7 @@ import { Difficulty } from '@/types/difficulty';
 
 export default function useEndlessTimer(isActive: boolean, onTimeout: () => void, difficulty: Difficulty) {
     const [timeLeft, setTimeLeft] = useState<number>(ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier);
-    const timePercentageLeft = useMemo(() => (timeLeft / ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier) * 100, [timeLeft, difficulty]);
+    const timePercentageLeft = useMemo(() => (timeLeft / (ENDLESS_STARTING_TIME * DIFFICULTY_SETTINGS[difficulty].timeMultiplier)) * 100, [timeLeft, difficulty]);
 
     useEffect(() => {
         if (!isActive) return;
