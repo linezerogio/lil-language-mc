@@ -38,48 +38,13 @@ export default function EndlessRapping({
     onEndEarly
 }: EndlessRappingProps) {
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-    const isUserScrollingRef = useRef(false);
-    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Auto-scroll to bottom when new lines are added, unless user has scrolled up
+    // Auto-scroll to bottom when new lines are added
     useEffect(() => {
-        if (scrollContainerRef.current && !isUserScrollingRef.current) {
+        if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
         }
     }, [completedLines]);
-
-    // Track user scrolling
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
-
-        const handleScroll = () => {
-            const { scrollTop, scrollHeight, clientHeight } = container;
-            const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 5;
-            
-            isUserScrollingRef.current = !isAtBottom;
-            
-            // Clear existing timeout
-            if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
-            }
-            
-            // Reset user scrolling flag after a delay if at bottom
-            if (isAtBottom) {
-                scrollTimeoutRef.current = setTimeout(() => {
-                    isUserScrollingRef.current = false;
-                }, 100);
-            }
-        };
-
-        container.addEventListener('scroll', handleScroll);
-        return () => {
-            container.removeEventListener('scroll', handleScroll);
-            if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
-            }
-        };
-    }, []);
 
     const getRhymeIndicator = (rhymeQuality: 'perfect' | 'near' | 'repeated' | 'short' | 'bad') => {
         const colorLight = rhymeQuality === 'perfect' ? '#5CE2C7' : rhymeQuality === 'near' ? '#7Fb304' : '#D70114';
@@ -168,14 +133,14 @@ export default function EndlessRapping({
                                 style={{ '--border-color-light': colorLight, '--border-color-dark': colorDark } as React.CSSProperties}
                             >
                                 <div className='flex items-center relative'>
-                                    <div className='flex items-center gap-3 flex-1 text-start text-[16px] lg:text-2xl py-[15px] lg:pt-[24px] pl-[15px] lg:pl-[40px] pr-[80px] lg:pr-[120px] dark:text-[#E1E3E3] dark:bg-[#1C1E1E] lg:leading-snug'>
+                                    <div className='flex items-center gap-3 flex-1 text-start text-[16px] lg:text-2xl py-[15px] lg:pt-[24px] pl-[15px] lg:pl-[30px] pr-[80px] lg:pr-[120px] lg:pb-[23px] bg-white dark:text-[#E1E3E3] dark:bg-[#1C1E1E] lg:leading-snug'>
                                         <div 
                                             className='flex-shrink-0 w-[25px] h-[25px] rounded-full flex items-center justify-center text-white text-[14px] font-bold bg-[var(--bg-color-light)] dark:bg-[var(--bg-color-dark)]'
                                             style={{ '--bg-color-light': colorLight, '--bg-color-dark': colorDark } as React.CSSProperties}
                                         >
                                             {index + 1}
                                         </div>
-                                        <span className='flex-1'>
+                                        <span className='flex-1 leading-[25px]'>
                                             {line.text}
                                         </span>
                                     </div>
