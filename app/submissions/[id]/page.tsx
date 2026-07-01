@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import ViewScore from '@/components/ViewScore';
 import { useRouter } from 'next/navigation';
-import { evaluateSubmission } from '@/util/evaluate';
 import ScoreBreakdown from '@/types/breakdown';
+import { evaluateSubmission } from '@/util/rhyming/evaluate';
 
 type SubmissionResponse = {
     id: number;
@@ -14,7 +14,20 @@ type SubmissionResponse = {
     keyword: string;
     mode: '4-Bar Mode' | 'Rapid Fire Mode' | 'Endless Mode';
     difficulty: 'easy' | 'medium' | 'hard' | 'zbra-easy' | 'zbra-hard';
+    daily?: {
+        challengeDate: string;
+        challengeNumber: number;
+        dailyMode: '4-Bar Mode' | 'Endless Mode';
+    } | null;
 };
+
+function formatDailyDate(date: string) {
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(`${date}T12:00:00`));
+}
 
 export default function SubmissionPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -60,8 +73,8 @@ export default function SubmissionPage({ params }: { params: { id: string } }) {
     }, [params.id, router]);
 
     useEffect(() => {
-        const evaluateScoreBreakdown = async () => {    
-        if (submission) {
+        const evaluateScoreBreakdown = async () => {
+            if (submission) {
                 const { scoreBreakdown } = await evaluateSubmission(submission.lines, submission.keyword, 0, 0);
                 setScoreBreakdown(scoreBreakdown);
             }
@@ -86,7 +99,12 @@ export default function SubmissionPage({ params }: { params: { id: string } }) {
     }
 
     return (
-        <main className='w-full max-w-[2560px] lg:mx-auto h-full'>
+        <main className='w-full max-w-[2560px] lg:mx-auto h-full relative'>
+            {submission.daily && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 rounded-full bg-white dark:bg-[#1C1E1E] border border-[#F5F5F5] dark:border-[#343737] px-4 py-2 font-[neulis-sans] font-bold text-[12px] lg:text-[14px] text-[#565757] dark:text-[#B2B2B2] whitespace-nowrap">
+                    Daily #{submission.daily.challengeNumber} | {submission.daily.dailyMode} | {formatDailyDate(submission.daily.challengeDate)}
+                </div>
+            )}
             <ViewScore
                 lines={submission.lines}
                 score={submission.score}
@@ -94,6 +112,8 @@ export default function SubmissionPage({ params }: { params: { id: string } }) {
                 mode={submission.mode}
                 difficulty={submission.difficulty}
                 scoreBreakdown={scoreBreakdown ?? new ScoreBreakdown()}
+                showDifficulty={!submission.daily}
+                daily={submission.daily}
             />
         </main>
     );

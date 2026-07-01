@@ -19,6 +19,7 @@ type RappingProps = {
     showQuitConfirmation: boolean;
     onQuitConfirm: () => void;
     onQuitCancel: () => void;
+    showDifficulty?: boolean;
 };
 
 export default function Rapping({
@@ -31,8 +32,13 @@ export default function Rapping({
     handleKeyPress,
     showQuitConfirmation,
     onQuitConfirm,
-    onQuitCancel
+    onQuitCancel,
+    showDifficulty = true
 }: RappingProps) {
+    const difficultyLabel = showDifficulty
+        ? difficulty[0].toUpperCase() + difficulty.slice(1)
+        : 'Daily';
+
     return (
         <>
             <div className="w-full px-[30px] lg:px-[100px] pb-[30px] lg:pb-[100px] pt-[25px] mx-auto flex flex-col h-[100vh]">
@@ -51,7 +57,7 @@ export default function Rapping({
                             Write 4 sentences that rhyme with the keyword
                         </h2>
                         <h3 className='flex-1 text-center text-[12px] lg:text-[1.3vw] lg:px-[100px] pt-[20px] leading-none tracking-[0.06em] text-[#8F8F8F]'>
-                            4-Bar Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)}
+                            4-Bar Mode | {difficultyLabel}
                         </h3>
                     </div>
                 </div>

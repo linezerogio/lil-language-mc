@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { RhymeQuality } from '@/util/evaluateRhyme';
+import { RhymeQuality } from '@/util/rhyming/evaluateRhyme';
 
 export type CompletedLine = {
     text: string;

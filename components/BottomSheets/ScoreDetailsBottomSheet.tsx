@@ -12,6 +12,7 @@ interface ScoreDetailsBottomSheetProps {
   lines?: string[];
   mode?: string;
   difficulty?: string;
+  showDifficulty?: boolean;
   targetWord?: string;
 }
 
@@ -22,8 +23,12 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
   lines = [],
   mode = "4-Bar Mode",
   difficulty = "Easy",
+  showDifficulty = true,
   targetWord = "Sword",
 }) => {
+  const difficultyLabel = showDifficulty
+    ? difficulty[0].toUpperCase() + difficulty.slice(1)
+    : 'Daily';
   const [isExpanded, setIsExpanded] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -95,7 +100,7 @@ const ScoreDetailsBottomSheet: React.FC<ScoreDetailsBottomSheetProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 justify-center">
                 <h3 className="text-[#565757] dark:text-[#B2B2B2] text-lg font-medium">
-                  {mode} | {difficulty[0].toUpperCase() + difficulty.slice(1)}{" "}
+                  {mode} | {difficultyLabel}{" "}
                   &ldquo;
                   {targetWord.charAt(0).toUpperCase() + targetWord.slice(1)}
                   &rdquo;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSubmission } from '@/app/server';
-import { evaluateSubmission } from '@/util/evaluate';
+import { getDailyContextForSubmission } from '@/app/daily/server';
 
 export async function GET(
     request: NextRequest,
@@ -17,7 +17,9 @@ export async function GET(
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ ...submission });
+        const daily = await getDailyContextForSubmission(id);
+
+        return NextResponse.json({ ...submission, daily });
     } catch (error) {
         console.error('Error fetching submission by id:', error);
         return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });

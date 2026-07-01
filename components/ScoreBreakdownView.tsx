@@ -29,6 +29,7 @@ interface ScoreBreakdownViewProps {
     lines?: string[];
     mode?: string;
     difficulty?: string;
+    showDifficulty?: boolean;
     targetWord?: string;
 }
 
@@ -81,7 +82,7 @@ const ScoreBreakdownSection: React.FC<ScoreBreakdownSectionProps> = ({ type, per
         );
 }
 
-const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown, lines = [], mode = "4-Bar Mode", difficulty = "Easy", targetWord = "Sword" }) => {
+const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown, lines = [], mode = "4-Bar Mode", difficulty = "Easy", showDifficulty = true, targetWord = "Sword" }) => {
     const [showInfo, setShowInfo] = useState<boolean>(false);
     const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
     const isMobile = useIsMobile();
@@ -165,6 +166,7 @@ const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({ scoreBreakdown,
                 lines={lines}
                 mode={mode}
                 difficulty={difficulty}
+                showDifficulty={showDifficulty}
                 targetWord={targetWord}
             />
         </div>

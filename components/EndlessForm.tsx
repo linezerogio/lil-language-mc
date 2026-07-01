@@ -11,15 +11,30 @@ import useCountdown from '../hooks/useCountdown';
 import useEndlessTimer from '../hooks/useEndlessTimer';
 import useEndlessLines from '../hooks/useEndlessLines';
 import { getDifficultyOptions, gameModeOptions } from '@/util/options';
-import { evaluateLine } from '@/util/evaluateRhyme';
-import { evaluateSubmission } from '@/util/evaluate';
+import { evaluateSubmission } from '@/util/rhyming/evaluate';
+import { evaluateLine } from '@/util/rhyming/evaluateRhyme';
 import { ENDLESS_PERFECT_RHYME_REFRESH, ENDLESS_NEAR_RHYME_BONUS } from '@/util/settings';
 import ScoreBreakdown from '@/types/breakdown';
 import { Mode } from '@/types/mode';
+import type { DailyMode } from '@/util/daily';
 
-export default function EndlessForm({ word, difficulty }: { word: string, difficulty: Difficulty }) {
+type DailySubmitConfig = {
+    playerId: string;
+    mode: DailyMode;
+};
+
+export default function EndlessForm({
+    word,
+    difficulty,
+    dailySubmit
+}: {
+    word: string,
+    difficulty: Difficulty,
+    dailySubmit?: DailySubmitConfig
+}) {
     const router = useRouter();
     const isMobile = useIsMobile();
+    const hasSubmittedRef = useRef(false);
 
     const [pageState, setPageState] = useState<'intro' | 'rapping' | 'score'>('intro');
     const [totalScore, setTotalScore] = useState<number>(0);
@@ -71,6 +86,11 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
     });
 
     const handleGameOver = async () => {
+        if (hasSubmittedRef.current) {
+            return;
+        }
+        hasSubmittedRef.current = true;
+
         // Calculate final score based on all completed lines (no time bonus/penalty for endless)
         const lines = completedLines.map(line => line.text);
         const { score: finalScore, scoreBreakdown: finalBreakdown } = await evaluateSubmission(lines, word, 0, 0);
@@ -79,12 +99,17 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
         
         // Save submission to database
         try {
-            await fetch('/api/submissions', {
+            const response = await fetch(dailySubmit ? '/api/daily/submissions' : '/api/submissions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
+                body: JSON.stringify(dailySubmit ? {
+                    playerId: dailySubmit.playerId,
+                    mode: dailySubmit.mode,
+                    lines,
+                    score: finalScore
+                } : {
                     lines,
                     score: finalScore,
                     keyword: word,
@@ -93,6 +118,17 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
                     scoreBreakdown: finalBreakdown
                 }),
             });
+
+            if (dailySubmit) {
+                const data = await response.json().catch(() => null);
+
+                if ((response.ok || response.status === 409) && data?.id) {
+                    router.replace(`/submissions/${data.id}`);
+                    return;
+                }
+
+                console.error('Failed to save Daily submission:', data);
+            }
         } catch (error) {
             console.error('Failed to save submission:', error);
         }
@@ -226,11 +262,16 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
     };
 
     const reset = () => {
+        hasSubmittedRef.current = false;
         setPageState('intro');
         resetCountdown(3);
         resetTimer();
         resetLines();
         setTotalScore(0);
+        if (dailySubmit) {
+            router.replace('/daily');
+            return;
+        }
         router.replace('/' + getRouteGameMode(newGameMode) + '/' + getRouteDifficulty(newDifficulty));
     };
 
@@ -251,6 +292,7 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
                 onQuitConfirm={handleQuitConfirm}
                 onQuitCancel={handleQuitCancel}
                 onEndEarly={() => handleGameOver()}
+                showDifficulty={!dailySubmit}
             />
         )
     } else if (pageState === "score") {
@@ -265,6 +307,7 @@ export default function EndlessForm({ word, difficulty }: { word: string, diffic
                 lines={lines}
                 inputRefs={inputRefs}
                 mode="Endless Mode"
+                showDifficulty={!dailySubmit}
                 difficultyOptions={difficultyOptions}
                 difficultyMenuOpen={difficultyMenuOpen}
                 onDifficultySelect={handleDifficultySelectWrapper}

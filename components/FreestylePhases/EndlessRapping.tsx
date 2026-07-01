@@ -21,6 +21,7 @@ type EndlessRappingProps = {
     onQuitConfirm: () => void;
     onQuitCancel: () => void;
     onEndEarly: () => void;
+    showDifficulty?: boolean;
 };
 
 export default function EndlessRapping({
@@ -35,9 +36,13 @@ export default function EndlessRapping({
     showQuitConfirmation,
     onQuitConfirm,
     onQuitCancel,
-    onEndEarly
+    onEndEarly,
+    showDifficulty = true
 }: EndlessRappingProps) {
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const difficultyLabel = showDifficulty
+        ? difficulty[0].toUpperCase() + difficulty.slice(1)
+        : 'Daily';
 
     // Auto-scroll to bottom when new lines are added
     useEffect(() => {
@@ -105,7 +110,7 @@ export default function EndlessRapping({
                             Write as many sentences as you can that rhyme with the keyword
                         </h2>
                         <h3 className='flex-1 text-center text-[12px] lg:text-[1.3vw] lg:px-[100px] pt-[20px] leading-none tracking-[0.06em] text-[#8F8F8F]'>
-                            Endless Mode | {difficulty[0].toUpperCase() + difficulty.slice(1)}
+                            Endless Mode | {difficultyLabel}
                         </h3>
                         <button 
                             className='text-[14px] lg:text-[16px] font-bold tracking-wider px-6 py-2 rounded-lg bg-[#F5F5F5] dark:bg-[#343737] hover:bg-[#E5E5E5] dark:hover:bg-[#404343] transition-colors mt-[20px]' 

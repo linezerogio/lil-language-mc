@@ -36,6 +36,7 @@ type ScoreProps = {
     lines: string[];
     inputRefs: React.MutableRefObject<(HTMLTextAreaElement | null)[]>;
     mode?: '4-Bar Mode' | 'Rapid Fire Mode' | 'Endless Mode'; // mode for display
+    showDifficulty?: boolean;
 
     // Difficulty menu state/handlers
     difficultyOptions: Option[];
@@ -70,6 +71,8 @@ type ScoreProps = {
 
     // Reset handler
     onPlayAgain: () => void;
+    primaryActionLabel?: string;
+    primaryActionDisabled?: boolean;
 };
 
 export default function Score({
@@ -81,6 +84,7 @@ export default function Score({
     lines,
     inputRefs,
     mode = '4-Bar Mode',
+    showDifficulty = true,
     difficultyOptions,
     difficultyMenuOpen,
     onDifficultySelect,
@@ -102,8 +106,17 @@ export default function Score({
     onScoreDetailsBottomSheetClose,
     onScoreBreakdownClick,
     onEasterEggDifficultyChange,
-    onPlayAgain
+    onPlayAgain,
+    primaryActionLabel = 'PLAY AGAIN',
+    primaryActionDisabled = false
 }: ScoreProps) {
+    const difficultyLabel = showDifficulty
+        ? difficulty[0].toUpperCase() + difficulty.slice(1)
+        : 'Daily';
+    const primaryActionTextClass = primaryActionLabel.length > 10
+        ? 'text-[16px] lg:text-[18px]'
+        : 'text-[18px] lg:text-[25px]';
+
     return (
         <div className="max-w-[2560px] w-full h-full px-[30px] lg:px-[100px] pt-[30px] lg:pt-[50px] mx-auto text-center flex flex-col">
             <Header 
@@ -116,12 +129,13 @@ export default function Score({
                     word={word}
                     scoreBreakdown={scoreBreakdown}
                     difficulty={difficulty}
+                    showDifficulty={showDifficulty}
                     mode={mode}
                     lines={lines}
                     onScoreBreakdownClick={onScoreBreakdownClick}
                 />
                 <div className="lg:hidden text-[14px] text-[#565757] dark:text-[#B2B2B2] -translate-y-[20px]">
-                    {mode} | {difficulty[0].toUpperCase() + difficulty.slice(1)} &quot;{word.charAt(0).toUpperCase() + word.slice(1)}&quot;
+                    {mode} | {difficultyLabel} &quot;{word.charAt(0).toUpperCase() + word.slice(1)}&quot;
                 </div>
                 <div className="hidden lg:flex flex-1 min-w-0">
                     <ScoreBreakdownView 
@@ -129,6 +143,7 @@ export default function Score({
                         lines={lines.filter(line => line.trim() !== '')}
                         mode={mode}
                         difficulty={difficulty}
+                        showDifficulty={showDifficulty}
                         targetWord={word}
                     />
                 </div>
@@ -153,15 +168,19 @@ export default function Score({
             </div>
 
             <div className='flex lg:mt-[30px] justify-center h-[43px] lg:h-[73px] w-full lg:w-auto gap-2.5 mb-[15px] lg:mb-0'>
-                <ModeSelector
-                    options={difficultyOptions}
-                    selectedMode={newDifficulty}
-                    onModeSelect={onDifficultySelect}
-                    onButtonClick={onDifficultyButtonClick}
-                    onClose={onDifficultyMenuClose}
-                    isMenuOpen={difficultyMenuOpen}
-                />
-                <button className="bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black text-[18px] lg:text-[25px] font-bold font-[termina] hidden lg:block w-full lg:w-[286px]" onClick={onPlayAgain}>PLAY AGAIN</button>
+                {showDifficulty ? (
+                    <ModeSelector
+                        options={difficultyOptions}
+                        selectedMode={newDifficulty}
+                        onModeSelect={onDifficultySelect}
+                        onButtonClick={onDifficultyButtonClick}
+                        onClose={onDifficultyMenuClose}
+                        isMenuOpen={difficultyMenuOpen}
+                    />
+                ) : (
+                    <div className="hidden lg:block lg:w-[286px]" />
+                )}
+                <button className={`bg-[#5CE2C7] h-[73px] mx-[25px] rounded-[12px] lg:rounded-[25px] text-black ${primaryActionTextClass} font-bold font-[termina] hidden lg:block w-full lg:w-[286px] whitespace-nowrap disabled:opacity-50 disabled:cursor-default`} onClick={onPlayAgain} disabled={primaryActionDisabled}>{primaryActionLabel}</button>
                 <ModeSelector
                     options={gameModeOptions}
                     selectedMode={newGameMode}
@@ -171,19 +190,21 @@ export default function Score({
                     isMenuOpen={gameModeMenuOpen}
                 />
             </div>
-            <button className="bg-[#5CE2C7] py-[10px] px-[20px] mb-[30px] rounded-[12px] text-black dark:text-white text-[18px] lg:text-[25px] font-bold font-[termina] block lg:hidden w-full" onClick={onPlayAgain}>PLAY AGAIN</button>
+            <button className={`bg-[#5CE2C7] py-[10px] px-[20px] mb-[30px] rounded-[12px] text-black dark:text-white ${primaryActionTextClass} font-bold font-[termina] block lg:hidden w-full whitespace-nowrap disabled:opacity-50 disabled:cursor-default`} onClick={onPlayAgain} disabled={primaryActionDisabled}>{primaryActionLabel}</button>
 
             <footer className="w-full mx-auto text-center pb-[20px] pt-[40px] opacity-50 font-[neulis-sans] font-bold text-[#565757] hidden lg:block">
                 ©{new Date().getFullYear()} LineZero Studio. All rights reserved.
             </footer>
 
             {/* Bottom Sheets for Mobile */}
-            <DifficultyBottomSheet
-                isOpen={difficultyBottomSheetOpen}
-                onClose={onDifficultyBottomSheetClose}
-                difficulty={newDifficulty}
-                onDifficultySelect={onDifficultyBottomSheetSelect}
-            />
+            {showDifficulty && (
+                <DifficultyBottomSheet
+                    isOpen={difficultyBottomSheetOpen}
+                    onClose={onDifficultyBottomSheetClose}
+                    difficulty={newDifficulty}
+                    onDifficultySelect={onDifficultyBottomSheetSelect}
+                />
+            )}
             
             <ModeBottomSheet
                 isOpen={gameModeBottomSheetOpen}
@@ -199,6 +220,7 @@ export default function Score({
                 lines={lines.filter(line => line.trim() !== '')}
                 mode={mode}
                 difficulty={difficulty}
+                showDifficulty={showDifficulty}
                 targetWord={word}
             />
         </div>

@@ -1,1 +1,1 @@
-export type Difficulty = 'easy' | 'medium' | 'hard' | 'zbra-easy' | 'zbra-hard';
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'daily' | 'zbra-easy' | 'zbra-hard';

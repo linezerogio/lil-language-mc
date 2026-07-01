@@ -1,8 +1,13 @@
 import { getWordByDifficulty, getWordData, Word } from '../../server';
 import FreestyleForm from '@/components/FreestyleForm';
 import { Difficulty } from '@/types/difficulty';
+import { redirect } from 'next/navigation';
 
 export default async function FreestylePage({params: {difficulty}}: {params: {difficulty: Difficulty | "zbra-easy" | "zbra-hard"}}) {
+  if (difficulty === 'daily') {
+    redirect('/daily/freestyle');
+  }
+
   // Function returns one by default but not as array so we explicitly define 1 for consistency
   // const words = generate(1);
   // const wordData = await getWordData(words.at(0) ?? "");

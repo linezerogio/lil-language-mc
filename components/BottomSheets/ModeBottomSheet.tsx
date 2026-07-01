@@ -43,11 +43,11 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
   };
 
   const handleGameModeSelect = (selectedMode: GameMode) => {
-    if (selectedMode === "4-Bar Mode") {
+    if (selectedMode !== "Rapid Fire Mode") {
       onGameModeSelect(selectedMode);
       onClose();
     }
-    // For other modes, don't close since they're locked
+    // Rapid Fire remains locked.
   };
 
   return (
@@ -80,7 +80,9 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
 
             <button
               onClick={() => handleGameModeSelect("Endless Mode")}
-              className="px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl relative cursor-default"
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${
+                gameMode === "Endless Mode" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""
+              }`}
             >
               <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
                 <Image 
@@ -95,10 +97,6 @@ const ModeBottomSheet: React.FC<ModeBottomSheetProps> = ({
               <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
                 Write as many sentences as possible that rhyme with the keyword within the time limit. Each rhyme resets the timer.
               </p>
-              <div className="absolute bottom-0 right-0 h-full w-full bg-[#0007] rounded-xl flex flex-col justify-center items-center">
-                <Image src="/icons/Lock.svg" height={37.33} width={28.44} alt="Lock Icon" />
-                <p className="text-[12px] text-white font-bold">Coming Soon</p>
-              </div>
             </button>
 
             <button

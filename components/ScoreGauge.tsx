@@ -8,6 +8,7 @@ interface ScoreGaugeProps {
   word: string;
   scoreBreakdown: ScoreBreakdown;
   difficulty: string;
+  showDifficulty?: boolean;
   mode?: string;
   lines: string[];
   onScoreBreakdownClick: () => void;
@@ -18,10 +19,14 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   word,
   scoreBreakdown,
   difficulty,
+  showDifficulty = true,
   mode = '4-Bar Mode',
   lines,
   onScoreBreakdownClick
 }) => {
+  const difficultyLabel = showDifficulty
+    ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+    : 'Daily';
   const [darkMode, setDarkMode] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -211,7 +216,7 @@ const ScoreGauge: React.FC<ScoreGaugeProps> = ({
             Click for score details
           </p>
           <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
-            {mode} | {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+            {mode} | {difficultyLabel}
           </p>
           <p className="text-[18px] tracking-[0.90px] leading-[normal] text-[#565757] hidden lg:block">
             &quot;{word.charAt(0).toUpperCase() + word.substring(1)}&quot;

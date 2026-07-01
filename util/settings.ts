@@ -26,6 +26,7 @@ export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
     'easy': { timeMultiplier: 1.0, wordSelection: { ntileSeparator: 3, ntileName: 'Third', ntileValue: 1 } },
     'medium': { timeMultiplier: 1.0, wordSelection: { ntileSeparator: 3, ntileName: 'Third', ntileValue: 2 } },
     'hard': { timeMultiplier: 1.0, wordSelection: { ntileSeparator: 3, ntileName: 'Third', ntileValue: 3 } },
+    'daily': { timeMultiplier: 1.0, wordSelection: { ntileSeparator: 3, ntileName: 'Third', ntileValue: 2 } },
     // ZBRA Easy: top decile; ZBRA Hard remains special-cased in server
     'zbra-easy': { timeMultiplier: 2.0, wordSelection: { ntileSeparator: 10, ntileName: 'Decile', ntileValue: 1 } },
     'zbra-hard': { timeMultiplier: 1.0, wordSelection: { ntileSeparator: 3, ntileName: 'Third', ntileValue: 3 } }

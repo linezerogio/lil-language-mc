@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Difficulty } from '@/types/difficulty';
 import { Mode } from '@/types/mode';
@@ -14,14 +14,27 @@ import useCountdown from '../hooks/useCountdown';
 import useRappingTimer from '../hooks/useRappingTimer';
 import useLines from '../hooks/useLines';
 import { getDifficultyOptions, gameModeOptions } from '@/util/options';
-import { evaluateSubmission } from '@/util/evaluate';
+import { evaluateSubmission } from '@/util/rhyming/evaluate';
 import { getEffectiveTimeSeconds } from '@/util/settings';
+import type { DailyMode } from '@/util/daily';
 
+type DailySubmitConfig = {
+    playerId: string;
+    mode: DailyMode;
+};
 
-
-export default function FreestyleForm({ word, difficulty }: { word: string, difficulty: Difficulty }) {
+export default function FreestyleForm({
+    word,
+    difficulty,
+    dailySubmit
+}: {
+    word: string,
+    difficulty: Difficulty,
+    dailySubmit?: DailySubmitConfig
+}) {
     const router = useRouter();
     const isMobile = useIsMobile();
+    const hasSubmittedRef = useRef(false);
     const [newGameMode, setNewGameMode] = useState<Mode>('4-Bar Mode');
     const effectiveTotalTime = useMemo(() => getEffectiveTimeSeconds(newGameMode, difficulty), [newGameMode, difficulty]);
 
@@ -167,29 +180,45 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
     };
 
     const reset = () => {
+        hasSubmittedRef.current = false;
         setPageState('intro');
         resetCountdown(3);
         resetRappingTimer();
         resetLines();
         setScore(0);
+        if (dailySubmit) {
+            router.replace('/daily');
+            return;
+        }
         router.replace('/' + getRouteGameMode(newGameMode) + '/' + getRouteDifficulty(newDifficulty));
     };
 
     const submit = async () => {
+        if (hasSubmittedRef.current) {
+            return;
+        }
+        hasSubmittedRef.current = true;
+
         const { score, scoreBreakdown } = await evaluateSubmission(lines, word, timeLeft, timePercentageLeft);
+        const submittedLines = lines.filter(line => line.trim() !== '');
         setScoreBreakdown(scoreBreakdown);
         // @ts-ignore
         setScore(score);
         
         // Save submission to database
         try {
-            await fetch('/api/submissions', {
+            const response = await fetch(dailySubmit ? '/api/daily/submissions' : '/api/submissions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    lines: lines.filter(line => line.trim() !== ''),
+                body: JSON.stringify(dailySubmit ? {
+                    playerId: dailySubmit.playerId,
+                    mode: dailySubmit.mode,
+                    lines: submittedLines,
+                    score
+                } : {
+                    lines: submittedLines,
                     score,
                     keyword: word,
                     mode: '4-Bar Mode',
@@ -197,6 +226,17 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                     scoreBreakdown
                 }),
             });
+
+            if (dailySubmit) {
+                const data = await response.json().catch(() => null);
+
+                if ((response.ok || response.status === 409) && data?.id) {
+                    router.replace(`/submissions/${data.id}`);
+                    return;
+                }
+
+                console.error('Failed to save Daily submission:', data);
+            }
         } catch (error) {
             console.error('Failed to save submission:', error);
         }
@@ -219,6 +259,7 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                 showQuitConfirmation={showQuitConfirmation}
                 onQuitConfirm={handleQuitConfirm}
                 onQuitCancel={handleQuitCancel}
+                showDifficulty={!dailySubmit}
             />
         )
     } else if (pageState === "score") {
@@ -229,8 +270,9 @@ export default function FreestyleForm({ word, difficulty }: { word: string, diff
                         scoreBreakdown={scoreBreakdown}
                         difficulty={difficulty}
                 newDifficulty={newDifficulty}
-                        lines={lines}
+                lines={lines}
                 inputRefs={inputRefs}
+                showDifficulty={!dailySubmit}
                 difficultyOptions={difficultyOptions}
                 difficultyMenuOpen={difficultyMenuOpen}
                 onDifficultySelect={handleDifficultySelectWrapper}

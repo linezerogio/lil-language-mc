@@ -38,6 +38,12 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
           width: 24,
           height: 15.78,
         };
+      case "daily":
+        return {
+          className: "mr-[10px]",
+          width: 24,
+          height: 18,
+        };
       default:
         return {};
     }
@@ -109,6 +115,25 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
               </div>
               <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
                 Some of the most difficult words to rhyme with.
+              </p>
+            </button>
+
+            <button
+              onClick={() => handleDifficultySelect("daily")}
+              className={`px-[15px] py-[15px] justify-center items-start flex flex-col rounded-xl ${difficulty === "daily" ? "bg-[#fff] dark:bg-[#1C1E1E]" : ""}`}
+            >
+              <div className="text-[16px] font-bold tracking-wider flex flex-row items-center">
+                <Image
+                  src="/icons/daily.svg"
+                  width={getDifficultyIconProps("daily").width}
+                  height={getDifficultyIconProps("daily").height}
+                  alt="Daily Icon"
+                  className={getDifficultyIconProps("daily").className}
+                />
+                Daily
+              </div>
+              <p className='text-[12px] text-[#B2B2B2] text-left pl-2 mt-1'>
+                One word each day. One attempt per mode.
               </p>
             </button>
 

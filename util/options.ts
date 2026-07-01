@@ -22,6 +22,13 @@ export const getDifficultyOptions = (newDifficulty: Difficulty) => {
             icon: '/Hard.svg',
             description: 'Some of the most difficult words to rhyme with.',
             iconProps: { width: 24, height: 15.78, mdWidth: 40, mdHeight: 26.3, className: 'mr-[10px]' }
+        },
+        {
+            value: 'daily' as Difficulty,
+            name: 'Daily',
+            icon: '/icons/daily.svg',
+            description: 'One word each day. One attempt per mode.',
+            iconProps: { width: 24, height: 18, mdWidth: 40, mdHeight: 30, className: 'mr-[10px]' }
         }
     ];
 
