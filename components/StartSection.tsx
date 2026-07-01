@@ -46,7 +46,7 @@ export default function StartSection() {
   const router = useRouter();
   const isMobile = useIsMobile();
 
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [difficulty, setDifficulty] = useState<Difficulty>("daily");
   const [difficultyMenuOpen, setDifficultyMenuOpen] = useState<boolean>(false);
   const [difficultyBottomSheetOpen, setDifficultyBottomSheetOpen] = useState<boolean>(false);
   const [dailyOverview, setDailyOverview] = useState<DailyOverview | null>(null);
@@ -94,7 +94,7 @@ export default function StartSection() {
     }
   };
 
-  const [newGameMode, setNewGameMode] = useState<GameMode>("4-Bar Mode");
+  const [newGameMode, setNewGameMode] = useState<GameMode>("Endless Mode");
   const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
   const [gameModeBottomSheetOpen, setGameModeBottomSheetOpen] = useState<boolean>(false);
 
@@ -209,7 +209,7 @@ export default function StartSection() {
     }
 
     return {
-      label: 'PLAY',
+      label: 'PLAY DAILY',
       disabled: false,
       onClick: () => router.push(getDailyModePath(newGameMode)),
     };
