@@ -181,7 +181,7 @@ export default function StartSection() {
               isMenuOpen={gameModeMenuOpen}
             />
           </div>
-          <button className={`bg-[#5CE2C7] py-[10px] px-[20px] mx-[25px] rounded-[12px] text-black dark:text-white ${primaryActionTextClass} font-bold font-[termina] block lg:hidden w-full whitespace-nowrap disabled:opacity-50 disabled:cursor-default`} onClick={primaryAction.onClick} disabled={primaryAction.disabled}>{primaryAction.label}</button>
+          <button className={`bg-[#5CE2C7] py-[10px] px-[20px] mx-[25px] rounded-[12px] text-black dark:text-white ${primaryActionTextClass} font-bold font-[termina] block lg:hidden w-[calc(100%-50px)] whitespace-nowrap disabled:opacity-50 disabled:cursor-default`} onClick={primaryAction.onClick} disabled={primaryAction.disabled}>{primaryAction.label}</button>
 
         </div>
       </div>

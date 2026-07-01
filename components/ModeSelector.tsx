@@ -82,7 +82,7 @@ export default function ModeSelector<T extends string = string>({
     <div
       ref={containerRef}
       className={cn(
-        "bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative lg:w-[311px] justify-center rounded-[10px] lg:rounded-[25px] flex-1 lg:flex-none py-3 lg:py-0",
+        "bg-[#FFF] dark:bg-[#1C1E1E] flex flex-row relative min-w-0 lg:w-[311px] justify-center rounded-[10px] lg:rounded-[25px] flex-1 lg:flex-none py-3 lg:py-0",
         isMenuOpen ? "z-50" : "z-10",
         className
       )}
@@ -93,11 +93,11 @@ export default function ModeSelector<T extends string = string>({
           type="button" 
           onClick={() => onButtonClick(selectedMode)} 
           className={cn(
-            "justify-between items-center gap-2.5 flex flex-row flex-1 px-[15px] lg:px-[25px]",
+            "justify-between items-center gap-2.5 flex flex-row flex-1 min-w-0 px-[15px] lg:px-[25px]",
             buttonClassName
           )}
         >
-          <div className="text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto items-center">
+          <div className="text-[14px] lg:text-[25px] font-bold tracking-wider flex flex-row mr-auto items-center min-w-0 whitespace-nowrap">
             <span className="block lg:hidden">
               <Image 
                 src={selectedOption.icon} 

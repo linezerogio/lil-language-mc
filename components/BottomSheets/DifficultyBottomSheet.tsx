@@ -55,10 +55,11 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
   };
 
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} snapPoints={[320]}>
+    <Sheet isOpen={isOpen} onClose={onClose} detent="content-height">
       <Sheet.Container className="!bg-[#f4f5f6] dark:!bg-[#25292D] rounded-[25px]">
         <Sheet.Header className="!bg-[#f4f5f6] dark:!bg-[#25292D]" />
         <Sheet.Content>
+          <Sheet.Scroller draggableAt="both">
           <div className="flex flex-col gap-5 !bg-[#f4f5f6] dark:!bg-[#25292D] px-5 pb-safe">
 
             <button
@@ -179,6 +180,7 @@ const DifficultyBottomSheet: React.FC<DifficultyBottomSheetProps> = ({
               </button>
             )}
           </div>
+          </Sheet.Scroller>
         </Sheet.Content>
       </Sheet.Container>
       <Sheet.Backdrop onTap={onClose} />
