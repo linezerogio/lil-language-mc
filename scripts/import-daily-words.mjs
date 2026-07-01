@@ -68,6 +68,7 @@ try {
     const batch = candidateRows.slice(offset, offset + batchSize);
     const insertRows = batch.map((row) => ({
       word: row.word,
+      pronunciation: '',
       rhymescore: 0,
       daily_source: row.daily_source,
       daily_frequency_rank: row.daily_frequency_rank,
@@ -79,6 +80,7 @@ try {
       insert into words ${sql(
         insertRows,
         'word',
+        'pronunciation',
         'rhymescore',
         'daily_source',
         'daily_frequency_rank',

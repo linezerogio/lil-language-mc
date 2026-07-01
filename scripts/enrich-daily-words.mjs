@@ -153,7 +153,7 @@ function chooseBestPronunciationStats(row, pronunciationIndex) {
     return {
       id: row.id,
       word: row.word,
-      pronunciation: null,
+      pronunciation: '',
       rhymescore: 0,
       has_stress_marker: false,
       strong_rhyme_key: null,

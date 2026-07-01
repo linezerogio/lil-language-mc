@@ -65,6 +65,15 @@ export default function StartSection() {
   }
 
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
+    if (selectedDifficulty === 'daily' && !dailyOverview) {
+      setDailyLoading(true);
+      setDailyError(null);
+    }
+
+    if (selectedDifficulty !== 'daily') {
+      setDailyError(null);
+    }
+
     setDifficulty(selectedDifficulty);
   }
 
@@ -174,7 +183,7 @@ export default function StartSection() {
       };
     }
 
-    if (dailyLoading) {
+    if (dailyLoading || (!dailyOverview && !dailyError)) {
       return {
         label: 'LOADING',
         disabled: true,
