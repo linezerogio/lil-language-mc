@@ -1,46 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Header from './Header';
 import useIsMobile from '../hooks/useIsMobile';
 import DifficultyBottomSheet from './BottomSheets/DifficultyBottomSheet';
 import ModeBottomSheet from './BottomSheets/ModeBottomSheet';
 import ModeSelector from './ModeSelector';
 import { Difficulty } from '@/types/difficulty';
-import { getOrCreateDailyPlayerId } from '@/util/dailyIdentity';
-import type { DailyAttemptStatus, DailyChallenge, DailyMode } from '@/util/daily';
+import { useDailyPrimaryAction } from '@/hooks/useDailyPrimaryAction';
 
 import { getDifficultyOptions, gameModeOptions } from '@/util/options';
 
 type GameMode = "4-Bar Mode" | "Rapid Fire Mode" | "Endless Mode";
-
-type DailyOverview = {
-  challenge: DailyChallenge;
-  attemptStatus?: DailyAttemptStatus;
-};
-
-function isDailyGameMode(mode: GameMode): mode is DailyMode {
-  return mode === '4-Bar Mode' || mode === 'Endless Mode';
-}
-
-function getDailyModeStatus(attemptStatus: DailyAttemptStatus | undefined, mode: GameMode) {
-  if (mode === '4-Bar Mode') {
-    return attemptStatus?.modes.freestyle;
-  }
-
-  if (mode === 'Endless Mode') {
-    return attemptStatus?.modes.endless;
-  }
-
-  return undefined;
-}
-
-function getDailyModePath(mode: DailyMode) {
-  return mode === 'Endless Mode' ? '/daily/endless' : '/daily/freestyle';
-}
-
-
 
 export default function StartSection() {
   const router = useRouter();
@@ -49,9 +21,6 @@ export default function StartSection() {
   const [difficulty, setDifficulty] = useState<Difficulty>("daily");
   const [difficultyMenuOpen, setDifficultyMenuOpen] = useState<boolean>(false);
   const [difficultyBottomSheetOpen, setDifficultyBottomSheetOpen] = useState<boolean>(false);
-  const [dailyOverview, setDailyOverview] = useState<DailyOverview | null>(null);
-  const [dailyLoading, setDailyLoading] = useState(false);
-  const [dailyError, setDailyError] = useState<string | null>(null);
 
   const handleDifficultyButton = (difficulty: Difficulty) => {
     if (isMobile) {
@@ -65,15 +34,6 @@ export default function StartSection() {
   }
 
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
-    if (selectedDifficulty === 'daily' && !dailyOverview) {
-      setDailyLoading(true);
-      setDailyError(null);
-    }
-
-    if (selectedDifficulty !== 'daily') {
-      setDailyError(null);
-    }
-
     setDifficulty(selectedDifficulty);
   }
 
@@ -125,46 +85,11 @@ export default function StartSection() {
   // Difficulty options configuration - dynamically include ZBRA modes only if selected
   const difficultyOptions = getDifficultyOptions(difficulty);
   const isDailySelected = difficulty === 'daily';
-
-  useEffect(() => {
-    if (!isDailySelected) {
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadDailyStatus() {
-      try {
-        setDailyLoading(true);
-        setDailyError(null);
-        const playerId = getOrCreateDailyPlayerId();
-        const response = await fetch(`/api/daily?playerId=${encodeURIComponent(playerId)}`, {
-          cache: 'no-store',
-        });
-
-        if (!response.ok) {
-          throw new Error('Daily is unavailable');
-        }
-
-        const data: DailyOverview = await response.json();
-        if (!cancelled) {
-          setDailyOverview(data);
-          setDailyLoading(false);
-        }
-      } catch (error: any) {
-        if (!cancelled) {
-          setDailyError(error?.message ?? 'Daily is unavailable');
-          setDailyLoading(false);
-        }
-      }
-    }
-
-    loadDailyStatus();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isDailySelected]);
+  const { action: dailyAction } = useDailyPrimaryAction({
+    enabled: isDailySelected,
+    selectedMode: newGameMode,
+    completedModeBehavior: 'view-submission',
+  });
 
   const primaryAction = useMemo(() => {
     if (!isDailySelected) {
@@ -175,45 +100,24 @@ export default function StartSection() {
       };
     }
 
-    if (!isDailyGameMode(newGameMode)) {
+    if (!dailyAction) {
       return {
         label: 'UNAVAILABLE',
         disabled: true,
         onClick: () => {},
-      };
-    }
-
-    if (dailyLoading || (!dailyOverview && !dailyError)) {
-      return {
-        label: 'LOADING',
-        disabled: true,
-        onClick: () => {},
-      };
-    }
-
-    if (dailyError || !dailyOverview) {
-      return {
-        label: 'UNAVAILABLE',
-        disabled: true,
-        onClick: () => {},
-      };
-    }
-
-    const modeStatus = getDailyModeStatus(dailyOverview.attemptStatus, newGameMode);
-    if (modeStatus?.submissionId) {
-      return {
-        label: 'VIEW SUBMISSION',
-        disabled: false,
-        onClick: () => router.push(`/submissions/${modeStatus.submissionId}`),
       };
     }
 
     return {
-      label: 'PLAY DAILY',
-      disabled: false,
-      onClick: () => router.push(getDailyModePath(newGameMode)),
+      label: dailyAction.label,
+      disabled: dailyAction.disabled,
+      onClick: () => {
+        if (!dailyAction.disabled && dailyAction.path) {
+          router.push(dailyAction.path);
+        }
+      },
     };
-  }, [dailyError, dailyLoading, dailyOverview, difficulty, isDailySelected, newGameMode, router]);
+  }, [dailyAction, difficulty, isDailySelected, newGameMode, router]);
 
   const primaryActionTextClass = primaryAction.label.length > 10
     ? 'text-[16px] lg:text-[18px]'

@@ -1,24 +1,19 @@
 'use client'
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Score from './FreestylePhases/Score';
 import ScoreBreakdown from '@/types/breakdown';
 import { Difficulty } from '@/types/difficulty';
 import { Mode } from '@/types/mode';
 import { getDifficultyOptions, gameModeOptions as getGameModeOptions } from '@/util/options';
-import { getOrCreateDailyPlayerId } from '@/util/dailyIdentity';
-import type { DailyAttemptStatus, DailyChallenge, DailyMode } from '@/util/daily';
+import { useDailyPrimaryAction } from '@/hooks/useDailyPrimaryAction';
+import type { DailyMode } from '@/util/daily';
 
 type DailySubmissionContext = {
     challengeDate: string;
     challengeNumber: number;
     dailyMode: DailyMode;
-};
-
-type DailyOverview = {
-    challenge: DailyChallenge;
-    attemptStatus?: DailyAttemptStatus;
 };
 
 type ViewScoreProps = {
@@ -32,24 +27,6 @@ type ViewScoreProps = {
     daily?: DailySubmissionContext | null;
 };
 
-function getDailyModePath(mode: DailyMode) {
-    return mode === 'Endless Mode' ? '/daily/endless' : '/daily/freestyle';
-}
-
-function getOtherDailyMode(mode: DailyMode): DailyMode {
-    return mode === 'Endless Mode' ? '4-Bar Mode' : 'Endless Mode';
-}
-
-function getDailyModeStatus(attemptStatus: DailyAttemptStatus | undefined, mode: DailyMode) {
-    return mode === 'Endless Mode'
-        ? attemptStatus?.modes.endless
-        : attemptStatus?.modes.freestyle;
-}
-
-function getDailyModeLabel(mode: DailyMode) {
-    return mode === 'Endless Mode' ? 'DAILY ENDLESS' : 'DAILY 4-BAR';
-}
-
 export default function ViewScore({
     lines,
     score,
@@ -62,13 +39,11 @@ export default function ViewScore({
 }: ViewScoreProps) {
     const router = useRouter();
     const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
-    const [dailyOverview, setDailyOverview] = useState<DailyOverview | null>(null);
-    const [dailyLoading, setDailyLoading] = useState(Boolean(daily));
-    const [dailyError, setDailyError] = useState<string | null>(null);
+    const submittedDifficulty = daily ? 'daily' : difficulty;
 
     // State for UI controls
-    const [newDifficulty, setNewDifficulty] = useState<Difficulty>(difficulty);
-    const [newGameMode, setNewGameMode] = useState<Mode>(mode);
+    const [newDifficulty, setNewDifficulty] = useState<Difficulty>(submittedDifficulty);
+    const [newGameMode, setNewGameMode] = useState<Mode>(daily?.dailyMode ?? mode);
     
     // Desktop menu state
     const [difficultyMenuOpen, setDifficultyMenuOpen] = useState(false);
@@ -82,46 +57,12 @@ export default function ViewScore({
     // Get options
     const difficultyOptions = useMemo(() => getDifficultyOptions(newDifficulty), [newDifficulty]);
     const gameModeOptions = useMemo(() => getGameModeOptions, []);
-
-    useEffect(() => {
-        if (!daily) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function loadDailyStatus() {
-            try {
-                setDailyLoading(true);
-                setDailyError(null);
-                const playerId = getOrCreateDailyPlayerId();
-                const response = await fetch(`/api/daily?playerId=${encodeURIComponent(playerId)}`, {
-                    cache: 'no-store',
-                });
-
-                if (!response.ok) {
-                    throw new Error('Daily is unavailable');
-                }
-
-                const data: DailyOverview = await response.json();
-                if (!cancelled) {
-                    setDailyOverview(data);
-                    setDailyLoading(false);
-                }
-            } catch (error: any) {
-                if (!cancelled) {
-                    setDailyError(error?.message ?? 'Daily is unavailable');
-                    setDailyLoading(false);
-                }
-            }
-        }
-
-        loadDailyStatus();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [daily]);
+    const isDailySelected = newDifficulty === 'daily';
+    const { action: dailyAction } = useDailyPrimaryAction({
+        enabled: isDailySelected,
+        selectedMode: newGameMode,
+        completedModeBehavior: 'play-other',
+    });
 
     // Difficulty handlers
     const handleDifficultySelect = (selectedDifficulty: string) => {
@@ -225,64 +166,12 @@ export default function ViewScore({
         return Array.from({ length: count }, () => '');
     }, [lines, mode]);
 
-    const dailyAction = useMemo(() => {
-        if (!daily) {
-            return null;
-        }
-
-        if (dailyLoading) {
-            return {
-                label: 'LOADING',
-                disabled: true,
-                mode: daily.dailyMode,
-                path: null,
-            };
-        }
-
-        if (dailyError || !dailyOverview || dailyOverview.challenge.id !== daily.challengeNumber) {
-            return {
-                label: 'DAILY COMPLETE',
-                disabled: true,
-                mode: daily.dailyMode,
-                path: null,
-            };
-        }
-
-        const currentStatus = getDailyModeStatus(dailyOverview.attemptStatus, daily.dailyMode);
-        if (!currentStatus?.completed) {
-            return {
-                label: `PLAY ${getDailyModeLabel(daily.dailyMode)}`,
-                disabled: false,
-                mode: daily.dailyMode,
-                path: getDailyModePath(daily.dailyMode),
-            };
-        }
-
-        const otherMode = getOtherDailyMode(daily.dailyMode);
-        const otherStatus = getDailyModeStatus(dailyOverview.attemptStatus, otherMode);
-        if (!otherStatus?.completed) {
-            return {
-                label: `PLAY ${getDailyModeLabel(otherMode)}`,
-                disabled: false,
-                mode: otherMode,
-                path: getDailyModePath(otherMode),
-            };
-        }
-
-        return {
-            label: 'VIEW SUBMISSION',
-            disabled: true,
-            mode: daily.dailyMode,
-            path: null,
-        };
-    }, [daily, dailyError, dailyLoading, dailyOverview]);
-
     return (
         <Score
             word={keyword}
             score={score}
             scoreBreakdown={scoreBreakdown}
-            difficulty={difficulty}
+            difficulty={submittedDifficulty}
             newDifficulty={newDifficulty}
             lines={displayLines}
             inputRefs={inputRefs}

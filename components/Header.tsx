@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Difficulty } from "@/types/difficulty";
 
 const links = {
@@ -16,6 +17,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ difficulty, onDifficultyChange }) => {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEasterEggOpen, setIsEasterEggOpen] = useState(false);
   const easterEggDesktopRef = useRef<HTMLDivElement>(null);
@@ -28,6 +30,10 @@ const Header: React.FC<HeaderProps> = ({ difficulty, onDifficultyChange }) => {
 
   const handleEasterEggClick = () => {
     setIsEasterEggOpen(!isEasterEggOpen);
+  };
+
+  const handleHomeClick = () => {
+    router.push('/');
   };
 
   const handleEasterEggDifficultyChange = (newDifficulty: Difficulty) => {
@@ -94,6 +100,9 @@ const Header: React.FC<HeaderProps> = ({ difficulty, onDifficultyChange }) => {
     <div className="flex justify-between w-full items-center relative">
       <div className="flex-col hidden lg:flex relative" ref={easterEggDesktopRef}>
         <button 
+          type="button"
+          aria-label="Go to home"
+          onClick={handleHomeClick}
           onContextMenu={(e) => {
             e.preventDefault();
             handleEasterEggClick();
@@ -147,6 +156,9 @@ const Header: React.FC<HeaderProps> = ({ difficulty, onDifficultyChange }) => {
 
       <div className="flex-col lg:hidden relative" ref={easterEggMobileRef}>
         <button 
+          type="button"
+          aria-label="Go to home"
+          onClick={handleHomeClick}
           onContextMenu={(e) => {
             e.preventDefault();
             handleEasterEggClick();

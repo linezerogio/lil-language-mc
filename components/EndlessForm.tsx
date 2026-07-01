@@ -16,6 +16,7 @@ import { evaluateLine } from '@/util/rhyming/evaluateRhyme';
 import { ENDLESS_PERFECT_RHYME_REFRESH, ENDLESS_NEAR_RHYME_BONUS } from '@/util/settings';
 import ScoreBreakdown from '@/types/breakdown';
 import { Mode } from '@/types/mode';
+import { useDailyPrimaryAction } from '@/hooks/useDailyPrimaryAction';
 import type { DailyMode } from '@/util/daily';
 
 type DailySubmitConfig = {
@@ -151,7 +152,8 @@ export default function EndlessForm({
         reset: resetLines 
     } = useEndlessLines();
 
-    const [newDifficulty, setNewDifficulty] = useState<Difficulty>(difficulty);
+    const submittedDifficulty: Difficulty = dailySubmit ? 'daily' : difficulty;
+    const [newDifficulty, setNewDifficulty] = useState<Difficulty>(submittedDifficulty);
     const [difficultyMenuOpen, setDifficultyMenuOpen] = useState<boolean>(false);
     const [difficultyBottomSheetOpen, setDifficultyBottomSheetOpen] = useState<boolean>(false);
 
@@ -159,6 +161,11 @@ export default function EndlessForm({
     const [gameModeMenuOpen, setGameModeMenuOpen] = useState<boolean>(false);
     const [gameModeBottomSheetOpen, setGameModeBottomSheetOpen] = useState<boolean>(false);
     const [scoreDetailsBottomSheetOpen, setScoreDetailsBottomSheetOpen] = useState<boolean>(false);
+    const { action: dailyAction } = useDailyPrimaryAction({
+        enabled: newDifficulty === 'daily',
+        selectedMode: newGameMode,
+        completedModeBehavior: 'play-other',
+    });
 
     const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
 
@@ -268,8 +275,10 @@ export default function EndlessForm({
         resetTimer();
         resetLines();
         setTotalScore(0);
-        if (dailySubmit) {
-            router.replace('/daily');
+        if (dailyAction) {
+            if (!dailyAction.disabled && dailyAction.path) {
+                router.replace(dailyAction.path);
+            }
             return;
         }
         router.replace('/' + getRouteGameMode(newGameMode) + '/' + getRouteDifficulty(newDifficulty));
@@ -302,19 +311,19 @@ export default function EndlessForm({
                 word={word}
                 score={score}
                 scoreBreakdown={scoreBreakdown}
-                difficulty={difficulty}
+                difficulty={submittedDifficulty}
                 newDifficulty={newDifficulty}
                 lines={lines}
                 inputRefs={inputRefs}
                 mode="Endless Mode"
-                showDifficulty={!dailySubmit}
+                showDifficulty={true}
                 difficultyOptions={difficultyOptions}
                 difficultyMenuOpen={difficultyMenuOpen}
                 onDifficultySelect={handleDifficultySelectWrapper}
                 onDifficultyButtonClick={handleDifficultyButtonWrapper}
                 onDifficultyMenuClose={() => setDifficultyMenuOpen(false)}
                 gameModeOptions={gameModeOptions}
-                newGameMode={newGameMode}
+                newGameMode={dailyAction?.mode ?? newGameMode}
                 gameModeMenuOpen={gameModeMenuOpen}
                 onGameModeSelect={handleGameModeSelectWrapper}
                 onGameModeButtonClick={handleGameModeButtonWrapper}
@@ -330,6 +339,8 @@ export default function EndlessForm({
                 onScoreBreakdownClick={() => setScoreDetailsBottomSheetOpen(true)}
                 onEasterEggDifficultyChange={handleEasterEggDifficultyChange}
                 onPlayAgain={() => reset()}
+                primaryActionLabel={dailyAction?.label}
+                primaryActionDisabled={dailyAction?.disabled}
             />
         )
     }

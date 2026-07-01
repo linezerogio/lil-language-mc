@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ViewScore from '@/components/ViewScore';
 import { useRouter } from 'next/navigation';
 import ScoreBreakdown from '@/types/breakdown';
+import { Difficulty } from '@/types/difficulty';
 import { evaluateSubmission } from '@/util/rhyming/evaluate';
 
 type SubmissionResponse = {
@@ -13,7 +14,7 @@ type SubmissionResponse = {
     played_on: string;
     keyword: string;
     mode: '4-Bar Mode' | 'Rapid Fire Mode' | 'Endless Mode';
-    difficulty: 'easy' | 'medium' | 'hard' | 'zbra-easy' | 'zbra-hard';
+    difficulty: Difficulty;
     daily?: {
         challengeDate: string;
         challengeNumber: number;
@@ -110,9 +111,9 @@ export default function SubmissionPage({ params }: { params: { id: string } }) {
                 score={submission.score}
                 keyword={submission.keyword}
                 mode={submission.mode}
-                difficulty={submission.difficulty}
+                difficulty={submission.daily ? 'daily' : submission.difficulty}
                 scoreBreakdown={scoreBreakdown ?? new ScoreBreakdown()}
-                showDifficulty={!submission.daily}
+                showDifficulty={true}
                 daily={submission.daily}
             />
         </main>
